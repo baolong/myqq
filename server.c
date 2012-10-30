@@ -7,6 +7,18 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+typedef struct User_Type
+{
+    char name[15];
+    char password[10];
+}User_Type;
+
+typedef struct User_List
+{
+    struct User_Type user;
+    struct User_List *next;
+}User_List;
+
 int main(int argc,char *argv[])
 {
 	int fp,fp_acc,num;
@@ -14,6 +26,7 @@ int main(int argc,char *argv[])
     pid_t pid;
     socklen_t len;
 	struct sockaddr_in ser_addr,cli_addr;
+    struct User_List USER_HEAD;
 	if ((fp = socket(AF_INET,SOCK_STREAM,0)) < 0)
 	{
         perror("fp");
@@ -36,10 +49,8 @@ int main(int argc,char *argv[])
             perror("fp_acc");
             break;
         }
-        perror("fp_acc");
         printf("IP：%s 链接.\n",inet_ntop(AF_INET,&cli_addr.sin_addr,ip,sizeof(ip)));
         pid = fork();
-        perror("pid");
         if (pid < 0)
         {
             perror("pid");
@@ -47,7 +58,6 @@ int main(int argc,char *argv[])
         }
         else if (pid == 0)
         {
-            printf("222\n");
             while(1)
             {
                 memset(date,0,sizeof(date));
@@ -57,8 +67,11 @@ int main(int argc,char *argv[])
                     close(fp_acc);
                     return 0;
                 }
+                printf("1234567890\n");
                 printf("%s\n",date);
-                send(fp_acc,date,sizeof(date),0);
+                send(fp_acc,date,strlen(date),0);
+                perror("send");
+                usleep(10);
             }
         }
     }
