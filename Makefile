@@ -1,4 +1,4 @@
-a:main.c user.c
-	gcc -g -o a main.c user.c
+a:main.c net.c net.h
+	gcc -g -o a main.c net.c
 clean:
 	rm a date
