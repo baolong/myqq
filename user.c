@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-
 struct User_List list;
 
 int InitList(struct User_List *user)
@@ -28,19 +27,19 @@ int ListEmpty(struct User_List user)
 
 /************************************
  *
- * 函数功能：获取链成员个数
- * 返回值：成员个数
+ * 函数功能：获取账号个数
+ * 返回值：账号个数
  *
  * *********************************/
 int ListLength(struct User_List *user)
 {
-    int n = 0;
+    int num = 0;
     while(user->next != NULL)
     {
-        n++;
+        num++;
         user = user->next;
     }
-    return(n);
+    return(num);
 }
 
 /************************************************
@@ -233,11 +232,9 @@ int SaveList(struct User_List *user)
     int sum = 0;
     char sum_[3];
     sum = ListLength(user);
-    printf("sum = %d\n",sum);
     sum_[1] = sum%10+48;
     sum_[0] = sum/10%10+48;
     sum_[2] = '\0';
-    printf("sum_ = %s\n",sum_);
     fwrite(sum_,sizeof(sum_),1,fp);
     if (NULL == user->next)
         return 1;
@@ -246,10 +243,8 @@ int SaveList(struct User_List *user)
         user = user->next;
         while(user != NULL)
         {
-            printf("测试\n");
             fwrite(user->user.name,USERNAME_SIZE*sizeof(char),1,fp);
             fwrite(user->user.password,USERPASSWD_SIZE*sizeof(char),1,fp);
-            printf("成功写：%s\n",user->user.name);
             user = user->next;
         }
     }
@@ -270,7 +265,6 @@ int LoadList(struct User_List *user)
     char sum_[3];
     fread(sum_,sizeof(sum_),1,fp);
     sum = atoi(sum_);
-    printf("sum_ = %d\n",sum);
     int a=0;
 //    user = user->next;
     while(sum > 0)
@@ -279,7 +273,6 @@ int LoadList(struct User_List *user)
         fread(passwd,USERPASSWD_SIZE*sizeof(char),1,fp);
         AddUser(user,name,passwd);
         a++;
-        printf("LoadList%d - %s\n",a,name);
         sum--;
 
     }
