@@ -12,11 +12,10 @@
 #include "user.h"
 #include "net.h"
 
-#define PORT 1234
-#define CLIENTNUM 100
-#define DATELEN 128*2
-#define IP "106.187.46.158"
-
+#define PORT 1234      //端口
+#define CLIENTNUM 100   //最大用户连接数
+#define DATELEN 128*2     //单次数据长度
+#define IP "106.187.46.158"     //服务器IP地址
 
 int SerNetInit(void);
 int CliNetInit(void);
