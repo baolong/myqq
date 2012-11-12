@@ -116,6 +116,9 @@ int main()
             char fri[10][USERNAME_SIZE];
             while(1)
             {
+                b = 0;
+                num = 0;
+                memset(&fri,0x0,sizeof(fri));
                 printf("输入用户名：");
                 scanf("%s",name);
                 printf("1. 添加好友  2.显示好友\n");

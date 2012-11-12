@@ -307,15 +307,15 @@ int LoadList(struct User_List *user)
     int sumoffriends = 0,numoffriends = 0;
     char sumoffriends_[5];
     memset(&sumofuser_, 0x0, sizeof(sumofuser_));
-    memset(&sumoffriends_, 0x0, sizeof(sumoffriends_));
     char nametemp[10][USERNAME_SIZE];
-    memset(&nametemp,0x0,sizeof(nametemp));
     fread(sumofuser_, sizeof(sumofuser_), 1, fp);
     sumofuser = atoi(sumofuser_);
     printf("sumofusers:%d\n",sumofuser);
 //    user = user->next;
     while(sumofuser > 0)
     {
+        memset(&sumoffriends_, 0x0, sizeof(sumoffriends_));
+        memset(&nametemp,0x0,sizeof(nametemp));
         fread(name, USERNAME_SIZE*sizeof(char), 1, fp);          //读取用户名
         fread(passwd, USERPASSWD_SIZE*sizeof(char), 1, fp);        //读取用户密码
         fread(sumoffriends_, sizeof(sumoffriends_), 1, fp);    //读取用户好友个数字符串
@@ -442,6 +442,7 @@ int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE])
         newfriend->front = friend;
         newfriend->next = NULL;
         friend->next = newfriend;
+        friend = friend->next;
         num++;
     }
     printf("添加了%d个好友\n",num);
