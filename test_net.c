@@ -10,10 +10,11 @@ int main()
     if (n == 1)
     {
         fp = SerNetInit();
-        char date[DATELEN] = "";
+        char date[DATELEN];
         fp_ = Accept(fp,&addr);
         while(1)
         {
+            memset(date,0x0,sizeof(date));
             printf("recv:%d\n",Recv(fp_,date));
             printf("接收到:%s\n",date);
         }
@@ -25,6 +26,7 @@ int main()
         fp = CliNetInit();
         while(1)
         {
+            memset(date,0x0,sizeof(date));
             scanf("%s",date);
             printf("send:%d\n",Send(fp,date));
         }

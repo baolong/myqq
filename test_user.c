@@ -5,7 +5,8 @@
  * ********************************************/
 #include <stdio.h>
 #include "user.h"
-#include "net.h"
+//#include "net.h"
+#include <string.h>
 
 char name[15],passwd[10];
 
@@ -33,7 +34,7 @@ int main()
     printf("%s-%s\n",list.user.name,list.user.password);
     int a = 0;
     char name[15],pass[10],newname[15],newpasswd[10];
-    printf("是否为空%d\n",ListEmpty(list));
+    printf("是否为空%d\n",ListEmpty(&list));
     printf("0.加载 1.初始化\n");
     scanf("%d",&a);
     if (a == 0)
