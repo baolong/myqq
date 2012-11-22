@@ -18,7 +18,7 @@
  *         bind失败 - 2
  *
  * ******************************/
-int SerNetInit(void)
+int SerNetInit()
 {
     int fp;
     struct sockaddr_in addr;
@@ -31,6 +31,8 @@ int SerNetInit(void)
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(PORT);
+    int i = 1;
+    setsockopt(fp,SOL_SOCKET,SO_REUSEADDR,&i,sizeof(i));
     if ((bind(fp,(struct sockaddr *)&addr,sizeof(addr))) < 0)
     {
         perror("bind");
@@ -48,10 +50,10 @@ int SerNetInit(void)
  *         connect失败 - 2
  *
  ***************************************/
-int CliNetInit(void)
+int CliNetInit()
 {
     int fp;
-    char IP_addr[10];
+    int i = 1;
     struct sockaddr_in addr;
     if ((fp = socket(AF_INET,SOCK_STREAM,0)) < 0)
     {
@@ -61,6 +63,7 @@ int CliNetInit(void)
     memset(&addr,0,sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(PORT);
+    setsockopt(fp,SOL_SOCKET,SO_REUSEADDR,&i,sizeof(i));
     inet_pton(AF_INET,IP,&addr.sin_addr);
     if ((fp = socket(AF_INET,SOCK_STREAM,0)) < 0)
     {
@@ -97,6 +100,7 @@ int Accept(int fp,struct sockaddr_in *cli_addr)
     printf("IP:%链接.\n",inet_ntop(AF_INET,&cli_addr->sin_addr,ip,sizeof(ip)));
     return fp_;
 }
+
 
 /*********************************
  *
@@ -137,27 +141,31 @@ int Send(int fp,char *date)
  *         失败 - -1
  *
  * ************************************/
-int RecvMseeage(struct Friend *friends,char sender[USERNAME_SIZE],int fp)
+int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp)
 {
     unsigned int num = 0;
     char receiver[USERNAME_SIZE],buf[DATELEN];
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
+    printf("1\n");
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
     {
         perror("receiver num");
         return -1;
     }
+    printf("2\n");
     if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
     {
         perror("recvbuf num");
         return -1;
     }
+    printf("接收到信息：%s - %s\n",receiver,buf);
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
-    if (OnLine(user,name,1))      //判断接收人是否在线
-        SendMessage(fp,buf,receiver);     //在线则直接发送给用户
+    printf("在线状态：%d\n",OnLine(user,receiver,1));
+    if (OnLine(user,receiver,1))      //判断接收人是否在线
+        SendMessage(user,buf,receiver);     //在线则直接发送给用户
     else
-                                    //离线则存入用户离线消息列表 
+        InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
     return num;
 }
 /*****************************************

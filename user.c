@@ -528,10 +528,17 @@ int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SI
     return -1;
 }
 
+int Itoa(int num,char str[DATELEN])
+{
+    str[0] = num%10;
+    str[1] = '\0';
+    return 0;
+}
+
 int Atoi(char str[])
 {
     int num = 0,a = 0;
-    while('\0' != str[a])
+//    while('\0' != str[a])
         num += (str[a] - '0');
     return num;
 }
@@ -546,7 +553,7 @@ int Atoi(char str[])
 int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN])
 {
     struct MessageLog *newmessage,*temp;
-    newmessage = (struct Friend *)malloc(sizeof(struct Friend));
+    newmessage = (struct MessageLog *)malloc(sizeof(struct MessageLog));
     newmessage->front = NULL;
     newmessage->next = NULL;
     strcpy(newmessage->message,message);
@@ -554,9 +561,9 @@ int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char mess
     {
         while(NULL != friends)
         {
-            if (0 == strcmp(friends->name,recvname))
+            if (0 == strcmp(friends->name,name))
             {
-                temp = friends->messagelog;
+                temp = &friends->messagelog;
                 while(NULL != temp->next)
                     temp = temp->next;
                 newmessage->front = temp;
@@ -582,22 +589,39 @@ int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char mess
 int GetSocket(struct User_List *user,char name[USERNAME_SIZE])
 {
     int fd;
-    if (NULL != user->next)
+    while(NULL != user->next)           //找到用户对应节点
     {
-        while(NULL != user->next)           //找到用户对应节点
-        {
-            if (0 == strcmp(user->user.name,name))
-                break;
-            else
-                user = user->next;
-        }
+        if (0 == strcmp(user->user.name,name))
+            break;
+        else
+            user = user->next;
     }
-    else
-        return -2;
     if (OnLine(user,name,1))                //判断该用户是否在线
         return user->user.socket;
     else
         return -1;
+}
+
+/*************************************
+ *
+ * 函数功能：通过用户名设置对应套接字描述符
+ * 参数：user - 用户列表
+ *       name - 用户名
+ *       fd - 套接字描述符
+ *
+ * *********************************/
+int SetSocket(struct User_List *user,char name[USERNAME_SIZE],int fd)
+{
+    while(NULL != user->next)
+    {
+        if (0 == strcmp(user->user.name,name))
+            break;
+        else
+            user = user->next;
+    }
+    user->user.socket = fd;           //设置套接字描述符
+    user->user.online = 1;       //设置为在线状态
+    return 0;
 }
 
 /*************************************
@@ -637,7 +661,7 @@ int GetTime(char time_str[21])
 {
     time_t time_;
     struct tm *time_tm;
-    t = time(NULL);
+    time_ = time(NULL);
     time_tm = localtime(&time_);
     strftime(time_str,21,"%F %T",time_tm);
     return 0;
@@ -667,11 +691,45 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
         else
             user = user->next;
     }
-    strcpy(new->.message,buf);      //将信息存入新节点
-    strcpy(new->sender,sender);     //写入发送者用户名
+    strcpy(new->message,buf);      //将信息存入新节点
+    strcpy(new->Sender,sender);     //写入发送者用户名
     GetTime(time_str);          //获取当前时间
     strcpy(new->SendTime,time_str);     //写入当前时间
     new->next = NULL;
     new->front = &user->user.offlinemessage;
     return 0;
 }
+
+/***************************************
+ *
+ * 函数功能：提取离线信息,并删除该离线消息
+ * 参数：user - 要获取信息的用户节点
+ *       sender - 接收发送者用户名
+ *       buf - 接收信息
+ * 返回值：成功 - 0
+ *         没有离线消息 - 1
+ *
+ * ***********************************/
+int GetOffLineMessage(struct User_List *user,char sender[USERNAME_SIZE],char buf[USERNAME_SIZE])
+{
+    struct OffLineMessage *cur,*del;
+    cur = &user->user.offlinemessage;
+    if (NULL != cur->next)
+    {
+        cur = cur->next;
+        strcpy(sender,cur->Sender);
+        strcpy(buf,cur->message);
+        del = cur;
+        cur->front->next = cur->next;
+        cur->next->front = cur->front;
+        free(del);
+        return 0;
+    }
+    else
+        return -1;
+}
+
+
+
+
+

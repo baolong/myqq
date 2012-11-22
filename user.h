@@ -57,16 +57,24 @@ int UserLogin(struct User_List *user,int fp);
 int AddUser(struct User_List *user,char name[],char password[],unsigned int num,char friends[][USERNAME_SIZE]);
 int UserNameChange(struct User_List *user,char *oldname,char *newname,char *passwd);
 int UserPasswdChange(struct User_List *user,char *name,char *passwd,char *oldpasswd);
+int SearchUser(struct User_List *user,char name[]);
 int UserDel(struct User_List *user,char name[],char password[]);
 int DisList(struct User_List *user);
 int SaveList(struct User_List *user);
 int LoadList(struct User_List *user);
 int OnLine(struct User_List *user,char name[],int sign);
 int AddFriend(struct User_List *user,char name[],char nameoffriend[]);
-int SearchUser(struct User_List *user,char name[]);
-int Itoa(int num,char str[]);
-int Atoi(char str[]);
 int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE]);
+int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SIZE]);
+int Itoa(int num,char str[DATELEN]);
+int Atoi(char str[]);
 int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN]);
+int GetSocket(struct User_List *user,char name[USERNAME_SIZE]);
+int SetSocket(struct User_List *user,char name[USERNAME_SIZE],int fd);
+int GetName(struct User_List *user,int fd,char name[USERNAME_SIZE]);
+int GetTime(char time_str[21]);
+int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
+int GetOffLineMessage(struct User_List *user,char sender[USERNAME_SIZE],char buf[USERNAME_SIZE]);
+
 
 #endif

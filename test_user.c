@@ -5,7 +5,7 @@
  * ********************************************/
 #include <stdio.h>
 #include "user.h"
-//#include "net.h"
+#include "net.h"
 #include <string.h>
 
 char name[15],passwd[10];

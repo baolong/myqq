@@ -1,6 +1,8 @@
-main = test_net.c
+bug = b
+main = client.c
 
-a:$(main) net.c net.h user.c user.h
-	gcc -g -o a $(main) net.c net.h user.c user.h
+$(bug) a:$(main) net.c net.h user.c user.h
+	gcc -g -o $(bug) $(main) net.c net.h user.c user.h
+	gcc -g -o a server.c net.c net.h user.c user.h -lpthread
 c:
 	rm a date
