@@ -51,13 +51,21 @@ loop:    printf("1.创建新账户.   2.登陆\n");
     }
     else if (2 == sign)
     {
+        int sign = 0;
+        printf("1 接收 2.发送\n");
+        scanf("%d",&sign);
         while(1)
         {
             memset(message,0x0,sizeof(message));
-            Send(fd,"c");
-            usleep(10);
-            Send(fd,"你好.");
-            usleep(10);
+            if (sign == 2)
+            {
+                Send(fd,"c");
+                usleep(10);
+                scanf("%s",message);
+                Send(fd,message);
+                usleep(10);
+                memset(message,0x0,sizeof(message));
+            }
             Recv(fd,message);
             printf("接收到:%s\n",message);
         }

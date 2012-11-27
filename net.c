@@ -114,7 +114,7 @@ int Recv(int fp,char *date)
     unsigned int num = 0;
     if ((num = recv(fp,date,DATELEN*sizeof(char),0)) < 0)
         perror("recv");
-//    date[num] = '\0';
+    date[num] = '\0';
     return num*DATELEN;
 }
 
@@ -130,6 +130,7 @@ int Send(int fp,char *date)
     unsigned int num = 0;
     if ((num = send(fp,date,strlen(date),0)) < 0)
         perror("send");
+    printf("发送了:%d\n",num);
     return num*DATELEN;
 }
 
@@ -147,21 +148,24 @@ int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNA
     char receiver[USERNAME_SIZE],buf[DATELEN];
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
-    printf("1\n");
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
     {
         perror("receiver num");
         return -1;
     }
-    printf("2\n");
+    receiver[num] = '\0';
     if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
     {
         perror("recvbuf num");
         return -1;
     }
+    buf[num] = '\0';
     printf("接收到信息：%s - %s\n",receiver,buf);
+    printf("fd: %d\n",GetSocket(user->next,receiver));
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
     printf("在线状态：%d\n",OnLine(user,receiver,1));
+    printf("链表：%s\n",user->next->next->user.name);
+    SendMessage(user,buf,sender);
     if (OnLine(user,receiver,1))      //判断接收人是否在线
         SendMessage(user,buf,receiver);     //在线则直接发送给用户
     else
@@ -189,9 +193,10 @@ int SendMessage(struct User_List *user,char message[DATELEN],char name[USERNAME_
         else
             user = user->next;
     }*/
+    printf("message:%s\n",message);
     if ((fd = GetSocket(user,name)) < 0)
         return -1;
-    if ((num = send(fd,message,sizeof(message),0)) > 0)
+    if ((num = send(fd,message,strlen(message),0)) > 0)
         return 0;
     return -1;
 }

@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define PORT 8889      //端口
+#define PORT 5555      //端口
 #define CLIENTNUM 100   //最大用户连接数
 #define DATELEN 128*2     //单次数据长度
 #define IP "106.187.46.158"     //服务器IP地址

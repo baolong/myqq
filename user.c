@@ -61,7 +61,9 @@ int UserChecking(struct User_List *user,char name[],char password[])
     while(user->next != NULL && 0 != strcmp(user->user.name,name))
         user = user->next;
     if (strcmp(user->user.password,password) == 0)
+    {
         return 1;
+    }
     else
         return 0;
 }
@@ -273,7 +275,8 @@ int DisList(struct User_List *user)
         while(user != NULL)
         {
             num++;
-            printf("第%d个账号：%s - %s\n",num,user->user.name,user->user.password);
+            printf("           名字 密码 fd 在线状态\n");
+            printf("第%d个账号：%s  -  %s  - %d - %s\n",num,user->user.name,user->user.password,user->user.socket,user->user.online?"在线":"离线");
             user = user->next;
         }
     }
