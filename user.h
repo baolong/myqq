@@ -74,7 +74,6 @@ int SetSocket(struct User_List *user,char name[USERNAME_SIZE],int fd);
 int GetName(struct User_List *user,int fd,char name[USERNAME_SIZE]);
 int GetTime(char time_str[21]);
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
-int GetOffLineMessage(struct User_List *user,char sender[USERNAME_SIZE],char buf[USERNAME_SIZE]);
 
 
 #endif

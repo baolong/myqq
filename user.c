@@ -698,39 +698,14 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
     strcpy(new->Sender,sender);     //写入发送者用户名
     GetTime(time_str);          //获取当前时间
     strcpy(new->SendTime,time_str);     //写入当前时间
+    user->user.offlinemessage.next = new;
     new->next = NULL;
     new->front = &user->user.offlinemessage;
+    printf("成功录入离线信息:%s\n",new->message);
+    printf("成功录入离线信息:%s - %s\n",user->user.name,user->user.offlinemessage.next->message);
     return 0;
 }
 
-/***************************************
- *
- * 函数功能：提取离线信息,并删除该离线消息
- * 参数：user - 要获取信息的用户节点
- *       sender - 接收发送者用户名
- *       buf - 接收信息
- * 返回值：成功 - 0
- *         没有离线消息 - 1
- *
- * ***********************************/
-int GetOffLineMessage(struct User_List *user,char sender[USERNAME_SIZE],char buf[USERNAME_SIZE])
-{
-    struct OffLineMessage *cur,*del;
-    cur = &user->user.offlinemessage;
-    if (NULL != cur->next)
-    {
-        cur = cur->next;
-        strcpy(sender,cur->Sender);
-        strcpy(buf,cur->message);
-        del = cur;
-        cur->front->next = cur->next;
-        cur->next->front = cur->front;
-        free(del);
-        return 0;
-    }
-    else
-        return -1;
-}
 
 
 

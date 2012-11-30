@@ -169,7 +169,10 @@ int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNA
     if (OnLine(user,receiver,1))      //判断接收人是否在线
         SendMessage(user,buf,receiver);     //在线则直接发送给用户
     else
+    {
         InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
+        printf("插入离线消息：%s\n",user->next->next->user.offlinemessage.next->message);
+    }
     return num;
 }
 /*****************************************
@@ -201,6 +204,40 @@ int SendMessage(struct User_List *user,char message[DATELEN],char name[USERNAME_
     return -1;
 }
 
+/*******************************************
+ *
+ * 函数功能：发送并删除用户离线消息
+ * 参数：user - 欲检测离线消息的用户节点
+ * 返回值： 成功 - 返回离线消息数
+ *          没有离线消息 - 0
+ *
+ * ****************************************/
+int SendOffLineMessage(struct User_List *user)
+{
+    int fd;
+    int num = 0;
+    struct OffLineMessage *offline = &user->user.offlinemessage;
+    struct OffLineMessage *del;
+    fd = user->user.socket;
+    if (NULL != offline->next)
+    {
+        offline = offline->next;
+        del = offline;
+        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
+        Send(fd,offline->message);
+        if (NULL != offline->next)
+        {
+            offline->front->next = offline->next;
+            offline->next->front = offline->front;
+        }
+        else
+            offline->front->next = NULL;
+        free(del);
+        return num;
+    }
+    printf("没有离线消息\n");
+    return 0;
+}
 
 
 
