@@ -111,11 +111,14 @@ int AddUser(struct User_List *user,char name[],char password[],unsigned int num,
 {
     struct User_List *new;                     //定义新链表指针
     new = (struct User_List *)malloc(sizeof(struct User_List));
-    while(user->next != NULL)                        //将原用户链表指针指向最后一个节点
+    while(user != NULL)                        //将原用户链表指针指向最后一个节点
     {
         if (!strcmp(user->user.name,name))
             return 2;
-        user = user->next;
+        if (NULL != user->next)
+            user = user->next;
+        else
+            break;
     }
     strcpy(new->user.name,name);
     strcpy(new->user.password,password);
@@ -257,6 +260,31 @@ int UserDel(struct User_List *user,char name[],char password[])
         }
     } 
     return 0;
+}
+
+/***********************************
+ *
+ * 函数功能：获取用户列表
+ * 返回值：成功 - 用户数
+ *         失败 - -1
+ *
+ * ********************************/
+int GetUserList(struct User_List *user,char list[][USERNAME_SIZE])
+{
+    int num = 1;
+    if (NULL != user->next)
+    {
+        user =user->next;
+        while(NULL != user)
+        {
+            strcpy(list[num],user->user.name);
+            num++;
+            if (NULL != user->next)
+                user = user->next;
+        }
+        return num;
+    }
+    return -1;
 }
 
 /***********************************
@@ -502,7 +530,7 @@ int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE])
  * **********************************************/
 int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SIZE])
 {
-    int num = 0;
+    int num = 1;
     struct Friend *temp;
     if (NULL != user->next)
     {

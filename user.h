@@ -2,7 +2,7 @@
 #define USER_H
 
 #define DATELEN 128*2      //单词数据长度
-#define USERNAME_SIZE 15     //用户名长度
+#define USERNAME_SIZE 20     //用户名长度
 #define USERPASSWD_SIZE 10      //密码长度
 
 struct MessageLog
@@ -74,6 +74,6 @@ int SetSocket(struct User_List *user,char name[USERNAME_SIZE],int fd);
 int GetName(struct User_List *user,int fd,char name[USERNAME_SIZE]);
 int GetTime(char time_str[21]);
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
-
+int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
 
 #endif
