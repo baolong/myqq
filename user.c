@@ -8,6 +8,7 @@
 #include <time.h>
 
 struct User_List list;
+int sign = 0;     //链表状态标志,0为空闲状态，1为写状态
 
 /*************************************
  *
@@ -19,6 +20,7 @@ int InitList(struct User_List *user)
     user = (struct User_List *)malloc(sizeof(struct User_List));
     user->front = NULL;
     user->next = NULL;
+    user->sign = 0;
     return 0;
 }
 
@@ -109,6 +111,7 @@ int UserLogin(struct User_List *user,int fp)
  * **********************************/
 int AddUser(struct User_List *user,char name[],char password[],unsigned int num,char friends[][USERNAME_SIZE])
 {
+    sign = 1;
     struct User_List *new;                     //定义新链表指针
     new = (struct User_List *)malloc(sizeof(struct User_List));
     while(user != NULL)                        //将原用户链表指针指向最后一个节点
@@ -128,6 +131,7 @@ int AddUser(struct User_List *user,char name[],char password[],unsigned int num,
     new->front = user;                 //将新链表指针和用户链表指针结合
     new->next = NULL;
     user->next = new;
+    sign = 0;
     return 1;
 }
 
@@ -236,6 +240,7 @@ int SearchUser(struct User_List *user,char name[])
  * ********************************/
 int UserDel(struct User_List *user,char name[],char password[])
 {
+    sign = 1;   
     struct User_List *del;      //定义新节点，存放欲删除用户节点
     del->front = NULL;
     del->next = NULL;
@@ -252,13 +257,14 @@ int UserDel(struct User_List *user,char name[],char password[])
                     del = user->next;
                     user->next = del->next;
                     free(del);                           //释放欲删除用户节点空间
-                    DisList(user);
+                    sign = 0;
                     return 1;
                 }
             }
             user = user->next;
         }
     } 
+    sign = 0;
     return 0;
 }
 

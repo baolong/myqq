@@ -6,12 +6,13 @@
 #include <sys/ioctl.h>
 #include <locale.h>
 
-int ColorInit();
+/*int ColorInit();
 int GetSize(int *x,int *y);
-int Windows_Client();
+int Cli_Windows(int *x,int *y);
+int Ser_windows(int *x,int *y);
 int Cli_DisPlayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE],int sign[100]);
-int Cli_DisPlayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE]);
-
+int Cli_DisPlayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE]);*/
+/*
 int main()
 {
     InitList(&list);
@@ -19,7 +20,7 @@ int main()
     char name[USERNAME_SIZE];
     char f[10][USERNAME_SIZE];
     int sign1[100] = {0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1};
-    char a[][USERNAME_SIZE] = {{"0"},{"1"},{"2"},{"3"},{"4"},{"原谅我当天不"},{"如果还"},{"asa"},{"8"},{"9"},{"10"},{"11"},{"12"},{"13"},{"14"},{"15"},{"16"},{"17"},{"18"},{"19"},{"20"},{"21"},{"22"},{"23"},{"24"},{"25"},{"26"},{"27"},{"28"},{"29"},{"30"},{"31"},{"32"},{"33"},{"34"},{"35"},{"36"},{"37"},{"38"},{"39"},{"40"},{"41"},{"42"},{"43"},{"44"}};
+    char a[][USERNAME_SIZE] = {{"不选择"},{"1"},{"2"},{"3"},{"4"},{"原谅我当天不"},{"如果还"},{"asa"},{"8"},{"9"},{"10"},{"11"},{"12"},{"13"},{"14"},{"15"},{"16"},{"17"},{"18"},{"19"},{"20"},{"21"},{"22"},{"23"},{"24"},{"25"},{"26"},{"27"},{"28"},{"29"},{"30"},{"31"},{"32"},{"33"},{"34"},{"35"},{"36"},{"37"},{"38"},{"39"},{"40"},{"41"},{"42"},{"43"},{"44"}};
     int x,y;
     char str[50];
     int num = 0,sign = 0;
@@ -34,7 +35,7 @@ int main()
     while(1)
     {
         clear();
-//        refresh();
+        refresh();
         Windows_Client(&x,&y);
         Cli_DisPlayFriendList(x,y,a,num,45,name,sign1);
         Cli_DisPlayUserDate(x,y,p,"大家好");
@@ -55,6 +56,162 @@ int main()
     }
     getch();
     endwin();
+    return 0;
+}*/
+
+/******************************
+ *
+ * 函数功能：窗口初始化
+ *
+ * ***************************/
+int WindowInit()
+{
+    setlocale(LC_ALL,"");
+    initscr();
+}
+
+/****************************
+ *
+ * 函数功能：登陆界面
+ *
+ *
+ * **************************/
+int Cli_Login(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
+{
+    clear();
+    attron(COLOR_PAIR(1));
+    box(stdscr,0,0);
+    move(y/2-2,x/2-10);
+    printw("账号:");
+    move(y/2,x/2-10);
+    printw("密码:");
+    move(y/2-2,x/2-4);
+    scanw("%s",name);
+    move(y/2,x/2-4);
+    scanw("%s",passwd);
+    move(10,20);
+    printw("%s - %s",name,passwd);
+    refresh();
+    return 0;
+}
+
+/****************************
+ *
+ * 函数功能：注册新账号
+ *
+ *
+ * **************************/
+int Cli_Apply(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
+{
+    char passwd1[USERPASSWD_SIZE];
+    char passwd2[USERPASSWD_SIZE];
+loop:    clear();
+    attron(COLOR_PAIR(1));
+    box(stdscr,0,0);
+    move(y/2-2,x/2-10);
+    printw("新用户名:");
+    move(y/2,x/2-10);
+    printw("密码:");
+    move(y/2+2,x/2-10);
+    printw("确认密码:");
+    move(y/2-2,x/2);
+    scanw("%s",name);
+    move(y/2,x/2);
+    scanw("%s",passwd1);
+    move(y/2+2,x/2);
+    scanw("%s",passwd2);
+    move(12,20);
+    printw("标识1");
+    if (0 == strcmp(passwd1,passwd2))
+        strcpy(passwd,passwd1);
+    else
+    {
+        move(y/2+4,x/2-5);
+        printw("两次密码不相同,请重新输入,按任意键继续");
+        getch();
+        goto loop;
+    }
+    move(10,20);
+    printw("%s - %s",name,passwd);
+    refresh();
+    return 0;
+}
+
+/********************************
+ *
+ * 函数功能：客户端欢迎界面
+ * 返回值：1 - 登陆
+ *         2 - 注册新账号
+ *
+ * ****************************/
+int Cli_Welcome(char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
+{
+    int x,y;
+    int key;
+    int sign = 1;
+    keypad(stdscr,1);
+    while(1)
+    {
+        clear();
+        refresh();
+        attron(COLOR_PAIR(1));
+        GetSize(&x,&y);
+        box(stdscr,0,0);
+        attroff(COLOR_PAIR(2));
+        if (sign == 1)
+            attron(COLOR_PAIR(3));
+        else
+            attron(COLOR_PAIR(4));
+        move(y/2-2,x/2-4);
+        printw("  登陆  ");
+        if (sign == 1)
+            attroff(COLOR_PAIR(3));
+        else
+            attroff(COLOR_PAIR(4));
+        if (sign == 2)
+            attron(COLOR_PAIR(3));
+        else
+            attron(COLOR_PAIR(4));
+        move(y/2,x/2-4);
+        printw("新建账号");
+        if (sign == 2)
+            attroff(COLOR_PAIR(3));
+        else
+            attroff(COLOR_PAIR(4));
+        refresh();
+        key = 0;
+        key = getch();
+        move(10,10);
+        printw("%d",key);
+        refresh();
+        switch(key)
+        {
+            case KEY_DOWN:
+                if (sign < 2)
+                    sign++;
+                break;
+            case KEY_UP:
+                if (sign > 1)
+                    sign--;
+                break;
+            case 108:
+            case 10:
+            case 109:
+            {
+                if (1 == sign)
+                {
+                    Cli_Login(x,y,name,passwd);
+                    return 1;
+                }
+                else
+                {
+                    Cli_Apply(x,y,name,passwd);
+                    return 2;
+                }
+            }
+                
+        }
+    }
     return 0;
 }
 
@@ -93,8 +250,8 @@ int ColorInit()
         return -1;
     init_pair(1,COLOR_GREEN,COLOR_BLACK);
     init_pair(2,COLOR_BLACK,COLOR_GREEN);
-    init_pair(3,COLOR_RED,COLOR_BLACK);
-    init_pair(4,COLOR_GREEN,COLOR_BLACK);
+    init_pair(3,COLOR_RED,COLOR_GREEN);
+    init_pair(4,COLOR_YELLOW,COLOR_BLACK);
     init_pair(5,COLOR_GREEN,COLOR_BLACK);
     init_pair(6,COLOR_GREEN,COLOR_BLACK);
     init_pair(7,COLOR_GREEN,COLOR_BLACK);
@@ -107,7 +264,7 @@ int ColorInit()
  *         失败 - -1
  *
  * *****************************/
-int Windows_Client(int *x,int *y)
+int Cli_Windows(int *x,int *y)
 {
     attron(COLOR_PAIR(1));
     *x = *y = 0;
@@ -139,6 +296,68 @@ int Windows_Client(int *x,int *y)
     return 0;
 }
 
+/*******************************
+ *
+ * 函数功能：服务器界面窗口a
+ *
+ * ****************************/
+int Ser_windows(int *x,int *y)
+{
+    attron(COLOR_PAIR(1));
+    *x =*y = 0;
+    GetSize(x,y);
+    box(stdscr,0,0);
+    move(1,*x/2-14);
+    printw("多人聊天软件服务器端");
+    move(2,*x-23);
+    printw("时间:2012.12.05 23:00");
+    move(3,1);
+    hline(ACS_HLINE,*x-2);
+    move(4,1);
+    printw("   用户列表");
+//    move(6,1);
+//    printw("你好我是谁你是");
+    move(5,1);
+    hline('-',15);
+    move(4,16);
+    vline(ACS_VLINE,*y-5);
+    move(4,*x - 20);
+    vline(ACS_VLINE,*y-5);
+    move(4,*x-15);
+    printw("服务器信息");
+    move(6,*x-19);
+    printw("用户总数：123");
+    move(7,*x-19);
+    printw("在线用户数：123");
+    move(11,*x-19);
+    hline(ACS_HLINE,18);
+    move(12,*x - 14);
+    printw("实时动态");
+    move(13,*x - 19);
+    hline('-',18);
+    move(5,*x-19);
+    hline('-',18);
+    move(4,32);
+    vline(ACS_VLINE,*y-5);
+    move(8,33);
+    hline(ACS_HLINE,*x - 33 - 20);
+    move(4,20);
+    printw("好友列表");
+//    move(6,17);
+//    printw("你好我是谁你是");
+    move(4,(*x-33-19)/2 - 10 + 33);
+    printw("用户信息");
+    move(5,33);
+    hline('-',*x - 53);
+    move(5,17);
+    hline('-',15);
+    move(*y-3,33);
+    hline(ACS_HLINE,*x - 53);
+    attroff(COLOR_PAIR(1));
+    move(*y-2,33);
+    return 0;
+}
+
 /******************************
  *
  * 函数功能：在对应区域显示好友列表
@@ -152,23 +371,23 @@ int Windows_Client(int *x,int *y)
  *         失败 - -1
  *
  * ***************************/
-int Cli_DisPlayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE],int sign[100])
+int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE],int sign[100])
 {
-    int num_ = 5;     //用于一屏显示好友个数的计数
+    int num_ = 6;     //用于一屏显示好友个数的计数
     int temp = 0;   //好友在好友列表中的序号
     int len;
-    char a[5];
+//    char a[5];
     char name_temp[USERNAME_SIZE];
     if (num >= sum)
         return 0;
     if (num > (y - 7))    //如果选中的好友序号大于一屏所能显示的好友数
         temp = num - (y -7);    //则将该好友显示在最低
-    while(num_ <= (y - 2))     
+    while(num_ <= (y - 3))     
     {
         if (strcmp(friends[temp],"") != 0)
         {
 //            len = 0;
-            strcpy(a,"");
+//            strcpy(a,"");
             strcpy(name_temp,"");
             len = strlen(friends[temp]);
 //            len = wcswidth(friends[temp],1000);
@@ -224,7 +443,7 @@ int Cli_DisPlayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
  *         失败 - -1
  *
  * **********************************/
-int Cli_DisPlayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE])
+int Cli_DisplayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE])
 {
     int cur = 5;
     if (NULL != user->next)
@@ -240,6 +459,130 @@ int Cli_DisPlayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SI
 //        refresh();
     }
     return 0;
+}
+
+/************************************
+ *
+ * 函数功能：服务器显示用户列表
+ * 参数：x,y - 窗口大小
+ *       list - 用户列表
+ *       num - 被选中用户编号
+ *       sum - 总用户数
+ *       sign - 用户在线标识
+ *       name - 返回当前选择用户名
+ * ***********************************/
+int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,int sign[100],char name[USERNAME_SIZE])
+{
+    int cur = 6;
+    int temp = 0;
+    int len = 0;
+    char name_temp[USERNAME_SIZE];
+    num -= 1;
+    if (num >= sum)
+        return 0;
+    if (num > (y - 8))    //如果选中的好友序号大于一屏所能显示的好友数
+        temp = num - (y -8);    //则将该好友显示在最低
+    while(cur <= (y - 2))     
+    {
+        if (strcmp(list[temp],"") != 0)
+        {
+            strcpy(name_temp,"");
+            len = strlen(list[temp]);
+            strcpy(name_temp,list[temp]);
+            while(len <= 13)
+            {
+                name_temp[len] = ' ';
+                len++;
+            }
+            name_temp[len] = '\0';
+            if (temp == num)      //如果是被选中的用户，则反色显示
+            {
+                attron(COLOR_PAIR(2));
+                mvaddstr(cur,2,name_temp);
+                attroff(COLOR_PAIR(2));
+                len =strlen(list[temp]);
+                strcpy(name,list[temp]);
+                name[len] = '\0';
+            }
+            else     //如果好友不是被选中的用户
+            {
+                if (sign[temp] == 1)
+                {
+                    attron(COLOR_PAIR(1));
+                    mvaddstr(cur,2,name_temp);
+                    attroff(COLOR_PAIR(1));
+                }
+                else
+                {
+                    attron(COLOR_PAIR(3));
+                    mvaddstr(cur,2,name_temp);
+                    attroff(COLOR_PAIR(3));
+                }
+            }
+            temp++;
+            cur++;
+        }
+        else
+            break;
+    }
+
+}
+
+/************************************
+ *
+ * 函数功能：服务器端显示用户好友列表
+ * 参数：x,y - 窗口大小
+ *       friends - 好友列表
+ *       num - 当前被选中好友编号
+ *       sum - 好友总数
+ *       name - 返回好友用户名
+ *
+ * ********************************/
+int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE])
+{
+    int cur = 6;
+    int temp = 0;
+    int len = 0;
+    char name_temp[USERNAME_SIZE];
+    num -= 1;
+    if (num >= sum)
+        return 0;
+    if (num > (y - 8))    //如果选中的好友序号大于一屏所能显示的好友数
+        temp = num - (y -8);    //则将该好友显示在最低
+    while(cur <= (y - 2))     
+    {
+        if (strcmp(friends[temp],"") != 0)
+        {
+            strcpy(name_temp,"");
+            len = strlen(friends[temp]);
+            strcpy(name_temp,friends[temp]);
+            while(len <= 13)
+            {
+                name_temp[len] = ' ';
+                len++;
+            }
+            name_temp[len] = '\0';
+            if (temp == num)      //如果是被选中的用户，则反色显示
+            {
+                attron(COLOR_PAIR(2));
+                mvaddstr(cur,17,name_temp);
+                attroff(COLOR_PAIR(2));
+                len =strlen(friends[temp]);
+                strcpy(name,friends[temp]);
+                name[len] = '\0';
+            }
+            else     //如果好友不是被选中的用户
+            {
+                attron(COLOR_PAIR(3));
+                mvaddstr(cur,17,name_temp);
+                attroff(COLOR_PAIR(3));
+            }
+            temp++;
+            cur++;
+        }
+        else
+            break;
+    } 
 }
 
 /*************************************
@@ -276,6 +619,5 @@ int Cli_KeyboardControl(int num,int sign,int logout)
     }
     return 0;
 }
-
 
 

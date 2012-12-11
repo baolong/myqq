@@ -138,42 +138,33 @@ int Send(int fp,char *date)
 /****************************************
  *
  * 函数功能：服务器端接收客户端信息
- * 返回值：成功 - 接收到信息的字节数
- *         失败 - -1
+ * 返回值：发送信息 - 0
+ *         添加好友 - 1
+ *         错误 - -1
  *
  * ************************************/
-int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp)
+int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp,char buf[DATELEN],char receiver[USERNAME_SIZE])
 {
     unsigned int num = 0;
-    char receiver[USERNAME_SIZE],buf[DATELEN];
+    char sign[2];
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
+    recv(fp,sign,sizeof(sign));  //接收功能选择
+    if (0 == strcmp(sign,"1"))   //如果为1，则为添加好友，返回1
+        return 1;
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
-    {
-        perror("receiver num");
         return -1;
-    }
     receiver[num] = '\0';
     if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
-    {
-        perror("recvbuf num");
         return -1;
-    }
     buf[num] = '\0';
-    printf("接收到信息：%s - %s\n",receiver,buf);
-    printf("fd: %d\n",GetSocket(user->next,receiver));
+    GetSocket(user->next,receiver);
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
-    printf("在线状态：%d\n",OnLine(user,receiver,1));
-    printf("链表：%s\n",user->next->next->user.name);
-    SendMessage(user,buf,sender);
-    if (OnLine(user,receiver,1))      //判断接收人是否在线
-        SendMessage(user,buf,receiver);     //在线则直接发送给用户
-    else
-    {
-        InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
-        printf("插入离线消息：%s\n",user->next->next->user.offlinemessage.next->message);
-    }
-    return num;
+//    if (OnLine(user,receiver,1))      //判断接收人是否在线
+//        SendMessage(user,buf,receiver);     //在线则直接发送给用户
+//    else
+//        InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
+    return 0;
 }
 /*****************************************
  *
@@ -185,7 +176,7 @@ int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNA
  * 返回值：成功 - 0
  *
  * *************************************/
-int SendMessage(struct User_List *user,char message[DATELEN],char name[USERNAME_SIZE])
+int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char name[USERNAME_SIZE])
 {
     unsigned int num = 0;
     int fd;
@@ -196,11 +187,13 @@ int SendMessage(struct User_List *user,char message[DATELEN],char name[USERNAME_
         else
             user = user->next;
     }*/
-    printf("message:%s\n",message);
     if ((fd = GetSocket(user,name)) < 0)
         return -1;
     if ((num = send(fd,message,strlen(message),0)) > 0)
+    {
+        InsertToMessagelog(friends,name,message);   //将信息写入接收者聊天记录
         return 0;
+    }
     return -1;
 }
 
@@ -239,7 +232,19 @@ int SendOffLineMessage(struct User_List *user)
     return 0;
 }
 
-
+/**********************************
+ *
+ * 函数功能：检测接收到信息的
+ *           第一个字节，以判断功能
+ * 返回值：返回第一个字节对应整数值
+ *
+ * ******************************/
+int JudgeFirstWord(char str[DATELEN])
+{
+    int num = 0;
+    num = str[0] - '0';
+    return num;
+}
 
 
 

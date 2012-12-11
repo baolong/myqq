@@ -20,8 +20,9 @@ int CliNetInit(void);
 int Accept(int fp,struct sockaddr_in *cli_addr);
 int Recv(int fp,char *date);
 int Send(int fp,char *date);
-int RecvMseeage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp);
-int SendMessage(struct User_List *user,char message[DATELEN],char name[USERNAME_SIZE]);
+int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp,char buf[DATELEN],char receiver[USERNAME_SIZE]);
+int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char name[USERNAME_SIZE]);
 int SendOffLineMessage(struct User_List *user);
+int JudgeFirstWord(char str[DATELEN]);
 
 #endif
