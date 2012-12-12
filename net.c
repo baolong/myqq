@@ -130,7 +130,6 @@ int Send(int fp,char *date)
     unsigned int num = 0;
     if ((num = send(fp,date,strlen(date),0)) < 0)
         perror("send");
-    printf("发送了:%d\n",num);
     return num*DATELEN;
 }
 
@@ -149,7 +148,8 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
     char sign[2];
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
-    recv(fp,sign,sizeof(sign));  //接收功能选择
+    if (recv(fp,sign,sizeof(sign)) <= 0)   //接收功能选择
+        return -1;
     if (0 == strcmp(sign,"1"))   //如果为1，则为添加好友，返回1
         return 1;
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
@@ -158,7 +158,6 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
     if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
         return -1;
     buf[num] = '\0';
-    GetSocket(user->next,receiver);
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
 //    if (OnLine(user,receiver,1))      //判断接收人是否在线
 //        SendMessage(user,buf,receiver);     //在线则直接发送给用户
