@@ -1,4 +1,5 @@
-c:server.c windows.c user.c user.h net.c net.h windows.h
+c:client.c windows.c user.c user.h net.c net.h windows.h
+	gcc -g -o b client.c windows.c windows.h user.h user.c net.h net.c -lcursesw -lpthread
 	gcc -g -o a server.c windows.c windows.h user.h user.c net.h net.c -lcursesw -lpthread
 cl:
 	rm c

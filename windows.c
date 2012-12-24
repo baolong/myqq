@@ -68,6 +68,7 @@ int WindowInit()
 {
     setlocale(LC_ALL,"");
     initscr();
+    ColorInit();
 }
 
 /****************************
@@ -78,7 +79,9 @@ int WindowInit()
  * **************************/
 int Cli_Login(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
 {
+    getch();
     clear();
+    leaveok(stdscr,0);
     attron(COLOR_PAIR(1));
     box(stdscr,0,0);
     move(y/2-2,x/2-10);
@@ -106,6 +109,7 @@ int Cli_Apply(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
     char passwd1[USERPASSWD_SIZE];
     char passwd2[USERPASSWD_SIZE];
 loop:    clear();
+    leaveok(stdscr,0);
     attron(COLOR_PAIR(1));
     box(stdscr,0,0);
     move(y/2-2,x/2-10);
@@ -120,13 +124,11 @@ loop:    clear();
     scanw("%s",passwd1);
     move(y/2+2,x/2);
     scanw("%s",passwd2);
-    move(12,20);
-    printw("标识1");
     if (0 == strcmp(passwd1,passwd2))
         strcpy(passwd,passwd1);
     else
     {
-        move(y/2+4,x/2-5);
+        move(y/2+4,x/2-18);
         printw("两次密码不相同,请重新输入,按任意键继续");
         getch();
         goto loop;
@@ -144,12 +146,13 @@ loop:    clear();
  *         2 - 注册新账号
  *
  * ****************************/
-int Cli_Welcome(char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
+int Cli_Welcome()
 {
     int x,y;
     int key;
     int sign = 1;
     keypad(stdscr,1);
+    leaveok(stdscr,1);
     while(1)
     {
         clear();
@@ -163,7 +166,7 @@ int Cli_Welcome(char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
         else
             attron(COLOR_PAIR(4));
         move(y/2-2,x/2-4);
-        printw("  登陆  ");
+        printw("登    陆");
         if (sign == 1)
             attroff(COLOR_PAIR(3));
         else
@@ -178,16 +181,24 @@ int Cli_Welcome(char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
             attroff(COLOR_PAIR(3));
         else
             attroff(COLOR_PAIR(4));
+        if (sign == 3)
+            attron(COLOR_PAIR(3));
+        else
+            attron(COLOR_PAIR(4));
+
+        move(y/2+2,x/2-4);
+        printw("退    出");
+        if (sign == 3)
+            attroff(COLOR_PAIR(3));
+        else
+            attroff(COLOR_PAIR(4));
         refresh();
         key = 0;
         key = getch();
-        move(10,10);
-        printw("%d",key);
-        refresh();
         switch(key)
         {
             case KEY_DOWN:
-                if (sign < 2)
+                if (sign < 3)
                     sign++;
                 break;
             case KEY_UP:
@@ -199,19 +210,15 @@ int Cli_Welcome(char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
             case 109:
             {
                 if (1 == sign)
-                {
-                    Cli_Login(x,y,name,passwd);
                     return 1;
-                }
-                else
-                {
-                    Cli_Apply(x,y,name,passwd);
+                else if (2 == sign)
                     return 2;
-                }
+                else
+                    return 3;
             }
-                
         }
     }
+    leaveok(stdscr,0);
     return 0;
 }
 
@@ -251,8 +258,8 @@ int ColorInit()
     init_pair(1,COLOR_GREEN,COLOR_BLACK);
     init_pair(2,COLOR_BLACK,COLOR_GREEN);
     init_pair(3,COLOR_RED,COLOR_GREEN);
-    init_pair(4,COLOR_YELLOW,COLOR_BLACK);
-    init_pair(5,COLOR_GREEN,COLOR_BLACK);
+    init_pair(4,COLOR_GREEN,COLOR_BLACK);
+    init_pair(5,COLOR_WHITE,COLOR_BLACK);
     init_pair(6,COLOR_GREEN,COLOR_BLACK);
     init_pair(7,COLOR_GREEN,COLOR_BLACK);
 }
@@ -354,7 +361,7 @@ int Ser_windows(int *x,int *y)
     move(*y-3,33);
     hline(ACS_HLINE,*x - 53);
     attroff(COLOR_PAIR(1));
-    move(*y-2,33);
+//    move(*y-2,33);
     return 0;
 }
 
@@ -478,6 +485,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
     int len = 0;
     char name_temp[USERNAME_SIZE];
     num -= 1;
+    strcpy(list[0],"整体动态");
     if (num >= sum)
         return 0;
     if (num > (y - 8))    //如果选中的好友序号大于一屏所能显示的好友数
@@ -506,17 +514,17 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
             }
             else     //如果好友不是被选中的用户
             {
-                if (sign[temp] == 1)
+                if (sign[temp] == 1)   //在线用户
                 {
-                    attron(COLOR_PAIR(1));
+                    attron(COLOR_PAIR(4));
                     mvaddstr(cur,2,name_temp);
-                    attroff(COLOR_PAIR(1));
+                    attroff(COLOR_PAIR(4));
                 }
-                else
+                else      //离线用户
                 {
-                    attron(COLOR_PAIR(3));
+                    attron(COLOR_PAIR(5));
                     mvaddstr(cur,2,name_temp);
-                    attroff(COLOR_PAIR(3));
+                    attroff(COLOR_PAIR(5));
                 }
             }
             temp++;
@@ -587,35 +595,54 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
 
 /*************************************
  *
- * 函数功能：客户端键盘控制
- * 参数：num - 当前选择用户编号
- *       sign - 功能选择
- *              0为好友列表控制
- *              1为进入聊天模式
+ * 函数功能：键盘控制
+ * 参数：num - 选择对象编号
+ *       sign - 功能选择 从0开始
  *       logout - 退出登录标识,为真有效
  * 
  * *********************************/
-int Cli_KeyboardControl(int num,int sign,int logout)
+int KeyboardControl(int *dis,int *num,int *max_num,int *sign,int *logout)
 {
     int key = 0;
+    keypad(stdscr,1);
     while(1)
     {
+        key = 0;
+        noecho();
         key = getch();
+        echo();
         switch(key)
         {
             case KEY_UP:
-                num--;
+                if (0 != num[*sign])
+                    num[*sign]--;
                 break;
             case KEY_DOWN:
-                num++;
+                num[*sign]++;
                 break;
-            case '\t':
-                sign = ~sign;
+            case '1':
+                *sign = 0;
+                break;
+            case '2':
+                *sign = 1;
+                break;
+            case '3':
+                *sign = 2;
+                break;
+            case '4':
+                *sign = 3;
+                break;
+            case '0':
+                if (*dis == 0)
+                    *dis = 1;
+                else
+                    *dis = 0;
                 break;
             case 27:
-                logout = 1;
-                break;
+                *logout = 1;
+           //     return 0;
         }
+        usleep(1000);
     }
     return 0;
 }

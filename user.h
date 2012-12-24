@@ -4,6 +4,9 @@
 #define DATELEN 128*2      //单词数据长度
 #define USERNAME_SIZE 20     //用户名长度
 #define USERPASSWD_SIZE 10      //密码长度
+#define USER_MAX 100  //最大在线人数
+#define FRIENDS_MAX 100 //最大好友数
+#define SENDDELAYTIME 100  //发送延时 单位毫秒
 
 struct MessageLog
 {
@@ -75,5 +78,6 @@ int GetName(struct User_List *user,int fd,char name[USERNAME_SIZE]);
 int GetTime(char time_str[21]);
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
 int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
+int GetOnline(struct User_List *user,int online[200]);
 
 #endif

@@ -10,14 +10,14 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define PORT 5555      //端口
+#define PORT 5556      //端口
 #define CLIENTNUM 100   //最大用户连接数
 #define DATELEN 128*2     //单次数据长度
 #define IP "106.187.46.158"     //服务器IP地址
 
 int SerNetInit(void);
 int CliNetInit(void);
-int Accept(int fp,struct sockaddr_in *cli_addr);
+int Accept(int fp,struct sockaddr_in cli_addr);
 int Recv(int fp,char *date);
 int Send(int fp,char *date);
 int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp,char buf[DATELEN],char receiver[USERNAME_SIZE]);

@@ -3,10 +3,12 @@
 #include "windows.h"
 #include <unistd.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include <curses.h>
 
-#define USER_MAX 100    //最大在线人数
-#define FRIENDS_MAX 100    //最大好友数
-#define SENDDELAYTIME 10   //发送信息后延迟时间 单位毫秒
+pthread_mutex_t mut;
+int dis = 0;
+
 struct arg
 {
     struct User_List *user;
@@ -14,15 +16,50 @@ struct arg
     char passwd[USERPASSWD_SIZE];
     char message[DATELEN];
     char temp[2][USERNAME_SIZE];
-    int fd;
+    int *fd;
+    int *sumofcli;
 };
+
+struct arg_key
+{
+    int *dis;
+    int *num;
+    int *max_num;
+    int *sign;
+    int *logout;
+};
+
+struct arg_dis    //显示进程参数结构
+{
+    struct User_List *user;
+    int *dis;
+    int *num;
+    int *sumofuser;
+    char *name_cur;
+};
+
+void *Display(void *argv1);
+void *NewUserConnect(void *argv1);
+void *Keyboard(void *argv1);
 
 int main()
 {
+    int sign_menu = 0;    //功能标识
+    int dis = 0;
+    int num[4] = {0};     //各模块被选中成员编号
+    int max_num[4] = {0};   //各模块最大成员数
+    int logout = 0;   //退出标识
     struct arg argv1[USER_MAX],*argv[USER_MAX];
+    struct arg_key argv_key1,*argv_key;
+    struct arg_dis argv_dis1,*argv_dis;
+    argv_key = &argv_key1;
+    argv_dis = &argv_dis1;
+    pthread_t pth_t[USER_MAX],pth,pth_dis;
+    int sumofuser = 0;
     int fd_ = 0,fd[USER_MAX] = {0};
     int sumofcli = 0;
-    char User_List *user = &list;
+    struct  User_List *user = &list;
+    char name_cur[USERNAME_SIZE];
     struct sockaddr_in cli_addr[USER_MAX];
     char message[USER_MAX][DATELEN];
     char name[USER_MAX][USERNAME_SIZE];
@@ -30,9 +67,26 @@ int main()
     char temp[2][USERNAME_SIZE];
     
     //各类初始化
-    InitList(user);
-    fd_ = SerNetInit();
+    argv_key->num = num;
+    argv_key->sign = &sign_menu;
+    argv_key->logout = &logout;
+    argv_key->dis = &dis;
+    argv_dis->user = user;
+    argv_dis->num = num;
+    argv_dis->dis = &dis;
+    argv_dis->sumofuser = &sumofuser;
+    argv_dis->name_cur = name_cur;
+
     WindowInit();
+    InitList(user);
+    pthread_mutex_init(&mut,NULL);
+//    user->front = NULL;
+//    user->next = NULL;
+    fd_ = SerNetInit();
+    keypad(stdscr,1);
+    pthread_create(&pth_dis,NULL,Display,argv_dis);    //创建显示进程
+//    sleep(2);
+    pthread_create(&pth,NULL,Keyboard,argv_key);    //创建键盘控制进程
 ALLOW: 
     while(sumofcli < USER_MAX)    //如果在线用户小于最大限制数，则继续接受用户连接
     {
@@ -42,10 +96,11 @@ ALLOW:
         memset(message[sumofcli],0x0,DATELEN*sizeof(char));
         memset(name[sumofcli],0x0,USERNAME_SIZE*sizeof(char));
         memset(passwd[sumofcli],0x0,USERPASSWD_SIZE*sizeof(char));
-        if ((fd[sumofcli] = Accept(fd_,&cli_addr[sumofcli])) > 0)
+
+        if ((fd[sumofcli] = Accept(fd_,cli_addr[sumofcli])) > 1)
         {
             argv[sumofcli]->user = user;
-            argv[sumofcli]->fd = fd[sumofcli];
+            argv[sumofcli]->fd = &fd[sumofcli];
             pthread_create(&pth_t[sumofcli],NULL,NewUserConnect,argv[sumofcli]);   //为用户创建新线程
             sumofcli++;   //在线用户数加一
         }
@@ -55,85 +110,162 @@ ALLOW:
     return 0;
 }
 
-void *NewUserConnect(void argv1)
+void *NewUserConnect(void *argv1)
 {
     int num = 0;
     struct User_List *cur;
     struct arg *argv;
-    char FriendList[FRRIENDS_MAX][USERNAME_SIZE];
-    argv = argv1;
-    cur = argv->user;
-    memset(argv,0x0,sizeof(struct arg));
+    char FriendList[FRIENDS_MAX][USERNAME_SIZE];
+    argv = (struct arg *)argv1;
+
 loop:
-    Recv(argv->fd,argv->message);   //接收选项
-    Recv(argv->fd,argv->name);
-    Recv(argv->fd,argv->passwd);
-    if (0 == strcmp(argv->message,"1"))   //注册用户
+    cur = argv->user;
+    memset(argv->message,0x0,sizeof(argv->message));
+    memset(argv->name,0x0,sizeof(argv->name));
+    memset(argv->passwd,0x0,sizeof(argv->passwd));
+    Recv(*argv->fd,argv->message);   //接收选项
+    Recv(*argv->fd,argv->name);
+    Recv(*argv->fd,argv->passwd);
+    if (0 == strcmp(argv->message,"2"))   //注册用户
     {
+        pthread_mutex_lock(&mut);
         AddUser(argv->user,argv->name,argv->passwd,0,argv->temp);
-        Send(argv->fd,"Create Success");
+        pthread_mutex_unlock(&mut);
+
+        Send(*argv->fd,"Create Success");
         goto loop;     //退出，重新登陆
     }
-    else if (0 == strcmp(argv->message,"2"))    //登陆账户
+    else if (0 == strcmp(argv->message,"1"))    //登陆账户
     {
+//        pthread_mutex_lock(&mut);
+        if (1 != UserChecking(cur,argv->name,argv->passwd))
+        {
+            Send(*argv->fd,"Password Wrong");
+            goto loop;
+        }
         char receiver[USERNAME_SIZE];
         char message[DATELEN];
         unsigned int numoffriend = 0;
         OnLine(argv->user,argv->name,2);  //设置用户为在线状态
-        SetSocket(argv->user,argv->name,argv->fd);   //设置用户套接字描述符
-        Send(argv->fd,"Login Success");   //发送登陆成功信息
+        SetSocket(argv->user,argv->name,*argv->fd);   //设置用户套接字描述符
+        Send(*argv->fd,"Login Success");   //发送登陆成功信息
         while(0 != strcmp(cur->user.name,argv->name) && NULL != cur->next)
             cur = cur->next;
         GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表
-        while(numoffriend < cur->user.numoffriend)    //逐一发送好友用户名
+/*        while(numoffriend < cur->user.numoffriend)    //逐一发送好友用户名
         {
-            Send(argv->fd,FriendList[numoffriend]);
+            Send(*argv->fd,FriendList[numoffriend]);
             numoffriend++;
             usleep(SENDDELAYTIME);    //发送后延时
         }
-        Send(argv->fd,"FriendList success");   //发送好友列表发送完成信号
+        Send(*argv->fd,"FriendList success");   //发送好友列表发送完成信号
         usleep(SENDDELAYTIME);
-        SendOffLineMessage(cur);    //发送离线消息
+        SendOffLineMessage(cur);    //发送离线消息*/
+//        pthread_mutex_unlock(&mut);
+    
         while(1)
         {
+//            pthread_mutex_lock(&mut);
             memset(receiver,0x0,sizeof(receiver));
             memset(message,0x0,sizeof(message));
-            num = RecvMessage(argv->user,&cur->user.friends,argv->name,argv->fd,message,receiver);
+            num = RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
+
             if (1 == num)   //添加好友
             {
-                Recv(argv->fd,receiver);   //接收欲添加的好友用户名
-                AddFriend(argv->user,argv->name,recviver);   //添加好友
+                Recv(*argv->fd,receiver);   //接收欲添加的好友用户名
+                AddFriend(argv->user,argv->name,receiver);   //添加好友
                 GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表
                 while(numoffriend < cur->user.numoffriend)    //逐一发送好友用户名
                 {
-                    Send(argv->fd,FriendList[numoffriend]);
+                    Send(*argv->fd,FriendList[numoffriend]);
                     numoffriend++;
                     usleep(SENDDELAYTIME);    //发送后延时
                 }
-                Send(argv->fd,"FriendList success");   //发送好友列表发送完成信号 
+                Send(*argv->fd,"FriendList success");   //发送好友列表发送完成信号 
             }
             else if (0 == num)  //发送信息
             {
-                RecvMessage(argv->user,&cur->user,friends,argv->name,argv->fd,message,receiver);
+                RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
                 if (OnLine(argv->user,receiver,1))    //判断接收人是否在线
-                    SendMessage(argv->user,message,receiver);   //在线则直接发送给用户
+                    SendMessage(argv->user,&cur->user.friends,message,receiver);   //在线则直接发送给用户
                 else
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
             }
-            else   //出错,则自动断开链接
+            else  //出错,则自动断开链接
+            {
+//                pthread_mutex_unlock(&mut);
                 break;
+            }
+//            pthread_mutex_unlock(&mut);
         }
 
-        close(argv->fd);    //关闭用户套接字描述符
-        OnLine(argv->user,argv->name,3);   //设置用户为离线状态
-        SetSocket(argv->user,argc->name,0);   //清除套接字描述符
-        sumofcli--;
+//        pthread_mutex_lock(&mut);
+//        OnLine(argv->user,argv->name,3);
+        SetSocket(argv->user,argv->name,0);   //清除套接字描述符
+        close(*argv->fd);    //关闭用户套接字描述符
+        OnLine(argv->user,argv->name,3);     //设置用户为离线状态
+
+//        pthread_mutex_unlock(&mut);
+//        sumofcli--;
     }
+    pthread_exit(NULL);
 }
 
+void *Display(void *argv1)
+{
+    struct arg_dis *argv2;
+    struct User_List *user;
+    argv2 = (struct arg_dis *)argv1;
+//    user = (struct User_List *)argv->user;
+    int x = 0,y = 0;
+    char userlist[200][USERNAME_SIZE];
+    char friendlist[200][USERNAME_SIZE];
+    int online_sign[200] = {0};
+    char friend_cur[USERNAME_SIZE];
+    int sumoffriends = 0;
+    int dis_temp = 0;
+    while(1)
+    {
+//        pthread_mutex_lock(&mut);
+//        if (*(argv->dis) == 1)
+        {
+            if (dis_temp == 0)
+                clear();   //清屏
+            Ser_windows(&x,&y);   //初始化窗口界面
+            memset(userlist,0x0,sizeof(userlist));
+            memset(friendlist,0x0,sizeof(friendlist));
+//            sleep(15);
+            *argv2->sumofuser = GetUserList(argv2->user,userlist);    //获取用户列表
+            move(10,40);
+            printw("列表:%s - %s - %s - %s",userlist[1],userlist[2],userlist[3],userlist[4]);
+            GetOnline(argv2->user,online_sign);   //获取用户在线状态
+            move(12,40);
+            printw("在线:%d - %d - %d - %d",online_sign[1],online_sign[2],online_sign[3],online_sign[4]);
+            Ser_DisplayUserList(x,y,userlist,/*argv2->num[0]*/1,/**argv2->sumofuser*/3,online_sign,argv2->name_cur);    //显示用户列表
+            sumoffriends = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
+            Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],sumoffriends,friend_cur);   //显示好友列表 
+//            *argv->dis = 0;
+            refresh();
+            sleep(1);
+        }
+//        else
+        {
+//            sleep(1);
+        }
+//        pthread_mutex_unlock(&mut);
+//            sleep(1);
+    }
+    pthread_exit(NULL);
+}
 
-
-
+void *Keyboard(void *argv1)
+{
+    struct arg_key *argv;
+    argv = (struct arg_key *)argv1;
+//    keypad(stdscr,1);
+    KeyboardControl(argv->dis,argv->num,argv->max_num,argv->sign,argv->logout);
+    pthread_exit(NULL);
+}
 
 
 

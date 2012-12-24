@@ -17,6 +17,6 @@ int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
 int Cli_DisplayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE]);
 int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,int sign[100],char name[USERNAME_SIZE]);
 int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE]);
-int Cli_KeyboardControl(int num,int sign,int logout);
+int KeyboardControl(int *dis,int *num,int max_num,int *sign,int *logout);
 
 #endif

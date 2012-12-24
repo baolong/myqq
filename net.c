@@ -35,7 +35,7 @@ int SerNetInit()
     setsockopt(fp,SOL_SOCKET,SO_REUSEADDR,&i,sizeof(i));
     if ((bind(fp,(struct sockaddr *)&addr,sizeof(addr))) < 0)
     {
-        perror("bind");
+//        perror("bind");
         return 2;
     }
     listen(fp,CLIENTNUM);
@@ -57,7 +57,7 @@ int CliNetInit()
     struct sockaddr_in addr;
     if ((fp = socket(AF_INET,SOCK_STREAM,0)) < 0)
     {
-        perror("fp");
+//        perror("fp");
         return 1;
     }
     memset(&addr,0,sizeof(addr));
@@ -67,12 +67,12 @@ int CliNetInit()
     inet_pton(AF_INET,IP,&addr.sin_addr);
     if ((fp = socket(AF_INET,SOCK_STREAM,0)) < 0)
     {
-        perror("fp");
+//        perror("fp");
         return 1;
     }
     if (connect(fp,(struct sockaddr *)&addr,sizeof(addr)) < 0)
     {
-        perror("connect");
+//        perror("connect");
         return 2;
     }
     return fp;
@@ -86,18 +86,13 @@ int CliNetInit()
  *         失败 - 1
  *
  * ****************************/
-int Accept(int fp,struct sockaddr_in *cli_addr)
+int Accept(int fp,struct sockaddr_in cli_addr)
 {
     int fp_;
-    char ip[128];
-    memset(ip,0x0,sizeof(ip));
     socklen_t len;
-    if ((fp_ = accept(fp,(struct sockaddr *)cli_addr,&len)) < 0)
-    {
-        perror("fp_");
+    len = 0;
+    if ((fp_ = accept(fp,(struct sockaddr *)&cli_addr,&len)) < 1)
         return 1;
-    }
-    printf("IP:%链接.\n",inet_ntop(AF_INET,&cli_addr->sin_addr,ip,sizeof(ip)));
     return fp_;
 }
 
@@ -112,8 +107,12 @@ int Accept(int fp,struct sockaddr_in *cli_addr)
 int Recv(int fp,char *date)
 {
     unsigned int num = 0;
-    if ((num = recv(fp,date,DATELEN*sizeof(char),0)) < 0)
-        perror("recv");
+    if ((num = recv(fp,date,DATELEN*sizeof(char),0)) < 0);
+//        perror("recv");
+    move(40,20);
+    printw("接收到：%s",date);
+    move(40,40);
+    refresh();
     date[num] = '\0';
     return num*DATELEN;
 }
@@ -128,8 +127,11 @@ int Recv(int fp,char *date)
 int Send(int fp,char *date)
 {
     unsigned int num = 0;
-    if ((num = send(fp,date,strlen(date),0)) < 0)
-        perror("send");
+    if ((num = send(fp,date,strlen(date),0)) < 0);
+//        perror("send");
+    move(20,10);
+    printw("发送了:%d",num);
+    refresh();
     return num*DATELEN;
 }
 
@@ -148,10 +150,18 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
     char sign[2];
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
-    if (recv(fp,sign,sizeof(sign)) <= 0)   //接收功能选择
+    if (recv(fp,sign,sizeof(sign),0) <= 0)   //接收功能选择
         return -1;
+    move(17,30);
+    printw("测试10");
+    refresh();
+    sleep(3);
     if (0 == strcmp(sign,"1"))   //如果为1，则为添加好友，返回1
         return 1;
+    move(18,30);
+    printw("测试11");
+    refresh();
+    sleep(3);
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
         return -1;
     receiver[num] = '\0';
@@ -215,7 +225,7 @@ int SendOffLineMessage(struct User_List *user)
     {
         offline = offline->next;
         del = offline;
-        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
+//        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
         Send(fd,offline->message);
         if (NULL != offline->next)
         {
@@ -227,7 +237,7 @@ int SendOffLineMessage(struct User_List *user)
         free(del);
         return num;
     }
-    printf("没有离线消息\n");
+//    printf("没有离线消息\n");
     return 0;
 }
 

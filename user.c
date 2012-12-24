@@ -20,7 +20,6 @@ int InitList(struct User_List *user)
     user = (struct User_List *)malloc(sizeof(struct User_List));
     user->front = NULL;
     user->next = NULL;
-    user->sign = 0;
     return 0;
 }
 
@@ -62,9 +61,12 @@ int UserChecking(struct User_List *user,char name[],char password[])
 {
     while(user->next != NULL && 0 != strcmp(user->user.name,name))
         user = user->next;
-    if (strcmp(user->user.password,password) == 0)
+    if (0 == strcmp(user->user.name,name))
     {
-        return 1;
+        if (strcmp(user->user.password,password) == 0)
+            return 1;
+        else
+            return 0;
     }
     else
         return 0;
@@ -280,13 +282,20 @@ int GetUserList(struct User_List *user,char list[][USERNAME_SIZE])
     int num = 1;
     if (NULL != user->next)
     {
-        user =user->next;
+        user = user->next;
         while(NULL != user)
         {
+            move(15+num,40);
+            printw("                              ");
+            move(15+num,40);
+            printw("GetUserList%d:%s - %s",num,user->user.name,user->user.password);
+            refresh();
             strcpy(list[num],user->user.name);
             num++;
             if (NULL != user->next)
                 user = user->next;
+            else
+                break;
         }
         return num;
     }
@@ -374,11 +383,11 @@ int SaveList(struct User_List *user)
 int LoadList(struct User_List *user)
 {
     FILE *fp;
-    printf("LoadList:%d\n",user);
+//    printf("LoadList:%d\n",user);
     char name[USERNAME_SIZE] = "",passwd[USERPASSWD_SIZE] = "";
     if ((fp = fopen("date","r+")) < 0)
     {
-        perror("fp");
+//        perror("fp");
         return 1;
     }
     int sumofuser = 0;
@@ -389,7 +398,7 @@ int LoadList(struct User_List *user)
     char nametemp[10][USERNAME_SIZE];
     fread(sumofuser_, sizeof(sumofuser_), 1, fp);
     sumofuser = atoi(sumofuser_);
-    printf("sumofusers:%d\n",sumofuser);
+//    printf("sumofusers:%d\n",sumofuser);
 //    user = user->next;
     while(sumofuser > 0)
     {
@@ -398,13 +407,13 @@ int LoadList(struct User_List *user)
         fread(name, USERNAME_SIZE*sizeof(char), 1, fp);          //读取用户名
         fread(passwd, USERPASSWD_SIZE*sizeof(char), 1, fp);        //读取用户密码
         fread(sumoffriends_, sizeof(sumoffriends_), 1, fp);    //读取用户好友个数字符串
-        printf("name:%s - %s sumoffriends_:%s\n",name,passwd,sumoffriends_);
+//        printf("name:%s - %s sumoffriends_:%s\n",name,passwd,sumoffriends_);
         sumoffriends = atoi(sumoffriends_);       //将用户好友个数转换成整型
         numoffriends = 0;
         while(numoffriends < sumoffriends)          //循环读取用户好友用户名
         {
             fread(nametemp[numoffriends],USERNAME_SIZE*sizeof(char),1,fp);
-            printf("%dfriend's name:%s\n",numoffriends,nametemp[numoffriends]);
+//            printf("%dfriend's name:%s\n",numoffriends,nametemp[numoffriends]);
             numoffriends++;
         }
         AddUser(user,name,passwd,sumoffriends,nametemp);
@@ -470,7 +479,7 @@ int AddFriend(struct User_List *user,char name[],char nameoffriend[])
 {
     if (SearchUser(user,nameoffriend))
     {
-        printf("没有该用户.\n");
+//        printf("没有该用户.\n");
         return 0;
     }
     if (NULL != user->next)
@@ -479,7 +488,7 @@ int AddFriend(struct User_List *user,char name[],char nameoffriend[])
         {
             if (!strcmp(user->user.name,name))
             {
-                printf("X");
+//                printf("X");
                 struct Friend *cur;
                 cur = &(user->user.friends);
                 {
@@ -524,7 +533,7 @@ int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE])
         friend = friend->next;
         num++;
     }
-    printf("添加了%d个好友\n",num);
+//    printf("添加了%d个好友\n",num);
     return num;
 }
 /***************************************************
@@ -540,6 +549,7 @@ int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SI
     struct Friend *temp;
     if (NULL != user->next)
     {
+        user = user->next;
         while(NULL != user)
         {
             if (!strcmp(user->user.name,name))
@@ -552,14 +562,19 @@ int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SI
                     {
                         strcpy(namelist[num],temp->name);
                         num++;
-                        temp = temp->next;
+                        if (NULL != temp->next)
+                            temp = temp->next;
+                        else
+                            break;
                     }
                     return user->user.numoffriend;
                 }
                 return -1;
             }
-            else
+            if (NULL != user->next)
                 user = user->next;
+            else
+                break;
         } 
     }
     return -1;
@@ -735,12 +750,37 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
     user->user.offlinemessage.next = new;
     new->next = NULL;
     new->front = &user->user.offlinemessage;
-    printf("成功录入离线信息:%s\n",new->message);
-    printf("成功录入离线信息:%s - %s\n",user->user.name,user->user.offlinemessage.next->message);
+//    printf("成功录入离线信息:%s\n",new->message);
+//    printf("成功录入离线信息:%s - %s\n",user->user.name,user->user.offlinemessage.next->message);
     return 0;
 }
 
-
+/***************************************
+ *
+ * 函数功能：获取用户在线状态
+ * 参数：user - 用户链表
+ *       online - 在线状态结构
+ *                值为2则到达末尾
+ *
+ * ************************************/
+int GetOnline(struct User_List *user,int online[200])
+{
+    int num = 1;
+    online[0] = 0;
+    if (NULL != user->next)
+    {
+        user = user->next;
+        while(NULL != user)
+        {
+            online[num] = user->user.online;
+            user = user->next;
+            num++;
+        }
+        online[num] = 2;
+        return 0;
+    }
+    return -1;
+}
 
 
 
