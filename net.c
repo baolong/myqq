@@ -1,3 +1,4 @@
+#include "myqq.h"
 #include "net.h"
 #include "user.h"
 #include <stdio.h>
@@ -127,11 +128,11 @@ int Recv(int fp,char *date)
 int Send(int fp,char *date)
 {
     unsigned int num = 0;
-    if ((num = send(fp,date,strlen(date),0)) < 0);
+    char temp[DATELEN];
+    memset(temp,0x0,sizeof(temp));
+    strcpy(temp,date);
+    if ((num = send(fp,temp,sizeof(temp),0)) < 0);
 //        perror("send");
-    move(20,10);
-    printw("发送了:%d",num);
-    refresh();
     return num*DATELEN;
 }
 
@@ -152,28 +153,26 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
     memset(buf,0x0,sizeof(buf));
     if (recv(fp,sign,sizeof(sign),0) <= 0)   //接收功能选择
         return -1;
-    move(17,30);
-    printw("测试10");
-    refresh();
-    sleep(3);
-    if (0 == strcmp(sign,"1"))   //如果为1，则为添加好友，返回1
-        return 1;
-    move(18,30);
-    printw("测试11");
-    refresh();
-    sleep(3);
+    if (0 == strcmp(sign,MENU_ADDFRIEND))   //如果为1，则为添加好友，返回1
+        return MENU_ADDFRIEND_I;
     if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
         return -1;
     receiver[num] = '\0';
     if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
         return -1;
     buf[num] = '\0';
+    move(30,30);
+    printw("                                     ");
+    move(30,30);
+    printw("接收到：%s - %s - %s",sign,receiver,buf);
+    refresh();
+
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
 //    if (OnLine(user,receiver,1))      //判断接收人是否在线
 //        SendMessage(user,buf,receiver);     //在线则直接发送给用户
 //    else
 //        InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
-    return 0;
+    return MENU_SENDMESSAGE_I;
 }
 /*****************************************
  *
@@ -198,6 +197,8 @@ int SendMessage(struct User_List *user,struct Friend *friends,char message[DATEL
     }*/
     if ((fd = GetSocket(user,name)) < 0)
         return -1;
+    send(fd,"2",2,0);
+    usleep(SENDDELAYTIME);
     if ((num = send(fd,message,strlen(message),0)) > 0)
     {
         InsertToMessagelog(friends,name,message);   //将信息写入接收者聊天记录
@@ -221,21 +222,27 @@ int SendOffLineMessage(struct User_List *user)
     struct OffLineMessage *offline = &user->user.offlinemessage;
     struct OffLineMessage *del;
     fd = user->user.socket;
-    if (NULL != offline->next)
+    if (NULL != user->user.offlinemessage.next)
     {
         offline = offline->next;
-        del = offline;
-//        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
-        Send(fd,offline->message);
-        if (NULL != offline->next)
+        while (NULL != user->user.offlinemessage.next)
         {
-            offline->front->next = offline->next;
-            offline->next->front = offline->front;
+            num++;
+            offline = user->user.offlinemessage.next;
+            del = offline;
+//        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
+            Send(fd,offline->message);
+            if (NULL != offline->next)
+            {
+                offline->front->next = offline->next;
+                offline->next->front = offline->front;
+            }
+            else
+                offline->front->next = NULL;
+            free(del);
         }
-        else
-            offline->front->next = NULL;
-        free(del);
         return num;
+
     }
 //    printf("没有离线消息\n");
     return 0;

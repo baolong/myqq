@@ -79,7 +79,6 @@ int WindowInit()
  * **************************/
 int Cli_Login(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
 {
-    getch();
     clear();
     leaveok(stdscr,0);
     attron(COLOR_PAIR(1));
@@ -273,6 +272,8 @@ int ColorInit()
  * *****************************/
 int Cli_Windows(int *x,int *y)
 {
+    int x1,y1;
+    getyx(stdscr,y1,x1);
     attron(COLOR_PAIR(1));
     *x = *y = 0;
     GetSize(x,y);
@@ -298,8 +299,9 @@ int Cli_Windows(int *x,int *y)
     move(*y-3,17);
     hline(ACS_HLINE,*x - 33);
     attroff(COLOR_PAIR(1));
-    move(*y-2,18);
 //    refresh();
+//    move(*y-2,33);
+    move(y1,x1);
     return 0;
 }
 
@@ -310,6 +312,8 @@ int Cli_Windows(int *x,int *y)
  * ****************************/
 int Ser_windows(int *x,int *y)
 {
+    int x1,y1;
+    getyx(stdscr,y1,x1);   //获取光标当前位置
     attron(COLOR_PAIR(1));
     *x =*y = 0;
     GetSize(x,y);
@@ -361,7 +365,7 @@ int Ser_windows(int *x,int *y)
     move(*y-3,33);
     hline(ACS_HLINE,*x - 53);
     attroff(COLOR_PAIR(1));
-//    move(*y-2,33);
+    move(y1,x1);   //恢复光标
     return 0;
 }
 
@@ -383,6 +387,7 @@ int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
     int num_ = 6;     //用于一屏显示好友个数的计数
     int temp = 0;   //好友在好友列表中的序号
     int len;
+    int x1,y1;
 //    char a[5];
     char name_temp[USERNAME_SIZE];
     if (num >= sum)
@@ -409,6 +414,7 @@ int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
                 len++;
             }
             name_temp[len] = '\0';
+            getyx(stdscr,y1,x1);   //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
                 attron(COLOR_PAIR(2));
@@ -431,6 +437,7 @@ int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
                     attroff(COLOR_PAIR(3));
                 }
             }
+            move(y1,x1);
             temp++;
             num_++;
         }
@@ -453,9 +460,11 @@ int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
 int Cli_DisplayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE])
 {
     int cur = 5;
+    int x1,y1;
     if (NULL != user->next)
     {
         user = user->next;
+        getyx(stdscr,y1,x1);    //获取光标当前坐标
         while(NULL != user)
         {
             if (0 == strcmp(name,user->user.name))
@@ -463,6 +472,7 @@ int Cli_DisplayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SI
             user = user->next;
             cur++;
         }
+        move(y1,x1);
 //        refresh();
     }
     return 0;
@@ -483,6 +493,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
     int cur = 6;
     int temp = 0;
     int len = 0;
+    int x1,y1;
     char name_temp[USERNAME_SIZE];
     num -= 1;
     strcpy(list[0],"整体动态");
@@ -503,6 +514,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
                 len++;
             }
             name_temp[len] = '\0';
+            getyx(stdscr,y1,x1);   //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
                 attron(COLOR_PAIR(2));
@@ -527,6 +539,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
                     attroff(COLOR_PAIR(5));
                 }
             }
+            move(y1,x1);    //恢复光标
             temp++;
             cur++;
         }
@@ -551,6 +564,7 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
     int cur = 6;
     int temp = 0;
     int len = 0;
+    int x1,y1;
     char name_temp[USERNAME_SIZE];
     num -= 1;
     if (num >= sum)
@@ -570,6 +584,7 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
                 len++;
             }
             name_temp[len] = '\0';
+            getyx(stdscr,y1,x1);    //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
                 attron(COLOR_PAIR(2));
@@ -585,6 +600,7 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
                 mvaddstr(cur,17,name_temp);
                 attroff(COLOR_PAIR(3));
             }
+            move(y1,x1);    //恢复光标
             temp++;
             cur++;
         }
@@ -601,48 +617,72 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
  *       logout - 退出登录标识,为真有效
  * 
  * *********************************/
-int KeyboardControl(int *dis,int *num,int *max_num,int *sign,int *logout)
+int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign)
 {
     int key = 0;
-    keypad(stdscr,1);
+    int x,y;
+    keypad(stdscr,0);
     while(1)
     {
-        key = 0;
-        noecho();
-        key = getch();
-        echo();
-        switch(key)
+        GetSize(&x,&y);
+        if (0 != *sign)   //若功能不为聊天输入模式，则检测按键
         {
-            case KEY_UP:
-                if (0 != num[*sign])
-                    num[*sign]--;
-                break;
-            case KEY_DOWN:
-                num[*sign]++;
-                break;
-            case '1':
-                *sign = 0;
-                break;
-            case '2':
-                *sign = 1;
-                break;
-            case '3':
-                *sign = 2;
-                break;
-            case '4':
-                *sign = 3;
-                break;
-            case '0':
-                if (*dis == 0)
-                    *dis = 1;
-                else
-                    *dis = 0;
-                break;
-            case 27:
-                *logout = 1;
-           //     return 0;
+            key = 0;
+            noecho();
+            key = getch();
+            echo();
+            switch(key)
+            {
+                case KEY_UP:
+                    if (0 != num[*sign])
+                        num[*sign]--;
+                    break;
+                case KEY_DOWN:
+                    num[*sign]++;
+                    break;
+                case '1':
+                    *sign = 0;
+                    break;
+                case '2':
+                    *sign = 1;
+                    break;
+                case '3':
+                    *sign = 2;
+                    break;
+                case '4':
+                    *sign = 3;
+                    break;
+                case 27:
+                    *logout = 1;
+            //     return 0;
+            }
+            usleep(1000);
         }
-        usleep(1000);
+        else     //若功能选择为聊天呼入模式，则获取用户输入
+        {
+
+            while(0 != *message_sign);   //等待发送缓冲区为空
+            echo();
+            move(y-2,17);
+            getstr(message);
+            *message_sign = 1;
+//            scanf("%s",message);
+            noecho();
+            if (0 == strcmp(message,"q"))
+                *sign = 1;
+            else
+            {
+//                *message_sign = 1;
+                move(y-4,17);
+                printw("                    ");
+                move(y-4,17);
+                printw("信息：%s",message);
+                move(y-2,17);
+//                printw("                            ");
+                move(y-2,17);
+                refresh();
+            }
+        }
     }
     return 0;
 }
