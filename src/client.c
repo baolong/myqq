@@ -2,7 +2,7 @@
 #include "net.h"
 #include "windows.h"
 #include <pthread.h>
-#include "myqq.h"
+#include "include.h"
 
 void *Keyboard(void *argv1);
 void *Display(void *argv1);
@@ -99,22 +99,25 @@ loop:
         clear();
         pthread_create(&pth_dis,NULL,Display,argv_dis);
         pthread_create(&pth_t,NULL,Keyboard,argv_key);  //创建键盘控制线程
+        char str[USERNAME_SIZE] = "2";
+        int num1 = 0;
         while(1)
         {
             if (message_sign == 1)
             {
 //                Send(fd,MENU_SENDMESSAGE);
-                send(fd,MENU_SENDMESSAGE,2,0);
+                send(fd,MENU_SENDMESSAGE,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
 //                Send(fd,"2");
-                send(fd,"2",USERNAME_SIZE*sizeof(char),0);
+                num1 = send(fd,str,USERNAME_SIZE*sizeof(char),0);
                 usleep(SENDDELAYTIME);
-                Send(fd,message_send);
+//                Send(fd,message_send);
+                send(fd,message_send,DATELEN*sizeof(char),0);
                 usleep(SENDDELAYTIME);
                 move(y-4,18);
                 printw("                         ");
                 move(y-4,18);
-                printw("发送成功:%s",message_send);
+                printw("发送成功:%d - %s",num1,message_send);
                 refresh();
                 message_sign = 0;
             }

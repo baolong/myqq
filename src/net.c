@@ -1,4 +1,4 @@
-#include "myqq.h"
+#include "include.h"
 #include "net.h"
 #include "user.h"
 #include <stdio.h>
@@ -142,20 +142,23 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
 {
     unsigned int num = 0;
     char sign[2];
+    memset(sign,0x0,sizeof(sign));
     memset(receiver,0x0,sizeof(receiver));
     memset(buf,0x0,sizeof(buf));
-    if (recv(fp,sign,sizeof(sign),0) <= 0)   //接收功能选择
+    if (recv(fp,sign,3*sizeof(char),0) <= 0)   //接收功能选择
         return -1;
     if (0 == strcmp(sign,MENU_ADDFRIEND))   //如果为1，则为添加好友，返回1
         return MENU_ADDFRIEND_I;
-    if ((num = recv(fp,receiver,sizeof(receiver),0)) < 0)     //接收信息接收人用户名
+    if ((num = recv(fp,receiver,USERNAME_SIZE*sizeof(char),0)) < 0)     //接收信息接收人用户名
         return -1;
-
-    receiver[num] = '\0';
-    if ((num = recv(fp,buf,sizeof(buf),0)) < 0)     //接收信息内容
+    if ((recv(fp,buf,DATELEN*sizeof(char),0)) < 0)     //接收信息内容
         return -1;
-    buf[num] = '\0';
-
+    move(34,30);
+/*    printw("                                           ");
+    move(34,30);
+    printw("RecvMessage:%d -  %s - %s - %s",num,sign,receiver,buf);
+    refresh();
+    sleep(1);*/
     InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
 //    if (OnLine(user,receiver,1))      //判断接收人是否在线
 //        SendMessage(user,buf,receiver);     //在线则直接发送给用户

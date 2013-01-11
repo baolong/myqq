@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <curses.h>
-#include "myqq.h"
+#include "include.h"
 
 pthread_mutex_t mut;
 
@@ -144,9 +144,9 @@ loop:
             memset(receiver,0x0,sizeof(receiver));
             memset(message,0x0,sizeof(message));
             num = RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
-            move(30,30);
+//            move(30,30);
 //            printw("聊天记录:%s",cur->user.friends.messagelog);
-            refresh();
+//            refresh();
             if (MENU_ADDFRIEND_I == num)   //添加好友
             {
                 Recv(*argv->fd,receiver);   //接收欲添加的好友用户名
