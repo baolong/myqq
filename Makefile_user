@@ -1,2 +1,0 @@
-a:test_user.c user.h user.c net.h net.c
-	gcc -o a test_user.c user.c user.h net.c net.h
