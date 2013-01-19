@@ -20,6 +20,10 @@ int InitList(struct User_List *user)
     user = (struct User_List *)malloc(sizeof(struct User_List));
     user->front = NULL;
     user->next = NULL;
+    user->user.offlinemessage.next = NULL;
+    user->user.offlinemessage.front = NULL;
+    user->user.friends.messagelog.front = NULL;
+    user->user.friends.messagelog.next = NULL;
     return 0;
 }
 
@@ -54,11 +58,15 @@ int ListLength(struct User_List *user)
 /************************************************
  *
  *函数功能：验证账号密码函数
- *返回值：  账号密码正确返回1，否则返回0
+ *返回值：  1 - 账号密码正确
+ *          0 - 账号密码错误
+ *          -1 - 用户列表为空
  *
  * *********************************************/
 int UserChecking(struct User_List *user,char name[],char password[])
 {
+    if (NULL == user->next)
+        return -1;
     while(user->next != NULL && 0 != strcmp(user->user.name,name))
         user = user->next;
     if (0 == strcmp(user->user.name,name))
@@ -285,11 +293,6 @@ int GetUserList(struct User_List *user,char list[][USERNAME_SIZE])
         user = user->next;
         while(NULL != user)
         {
-            move(15+num,40);
-            printw("                              ");
-            move(15+num,40);
-            printw("GetUserList%d:%s - %s",num,user->user.name,user->user.password);
-            refresh();
             strcpy(list[num],user->user.name);
             num++;
             if (NULL != user->next)
@@ -602,15 +605,17 @@ int Atoi(char str[])
  *         失败 - -1
  *
  * ************************************/
-int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN])
+int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN],int sign)
 {
     struct MessageLog *newmessage,*temp;
     newmessage = (struct MessageLog *)malloc(sizeof(struct MessageLog));
     newmessage->front = NULL;
     newmessage->next = NULL;
     strcpy(newmessage->message,message);
+    newmessage->sign = sign;
     if (NULL != friends->next)
     {
+        friends = friends->next;
         while(NULL != friends)
         {
             if (0 == strcmp(friends->name,name))
@@ -747,6 +752,9 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
     strcpy(new->Sender,sender);     //写入发送者用户名
     GetTime(time_str);          //获取当前时间
     strcpy(new->SendTime,time_str);     //写入当前时间
+    move(35,20);
+    printw("离线：%s - %s - %s",new->message,new->Sender,user->user.offlinemessage.message);
+    refresh();
     user->user.offlinemessage.next = new;
     new->next = NULL;
     new->front = &user->user.offlinemessage;

@@ -141,6 +141,7 @@ int Send(int fp,char *date)
 int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp,char buf[DATELEN],char receiver[USERNAME_SIZE])
 {
     unsigned int num = 0;
+    struct MessageLog *msglog = NULL;
     char sign[2];
     memset(sign,0x0,sizeof(sign));
     memset(receiver,0x0,sizeof(receiver));
@@ -153,19 +154,10 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
         return -1;
     if ((recv(fp,buf,DATELEN*sizeof(char),0)) < 0)     //接收信息内容
         return -1;
-    move(34,30);
-/*    printw("                                           ");
-    move(34,30);
-    printw("RecvMessage:%d -  %s - %s - %s",num,sign,receiver,buf);
-    refresh();
-    sleep(1);*/
-    InsertToMessagelog(friends,sender,buf);    //将信息写入发送者的聊天记录
-//    if (OnLine(user,receiver,1))      //判断接收人是否在线
-//        SendMessage(user,buf,receiver);     //在线则直接发送给用户
-//    else
-//        InsertOffLineMessage(user,buf,receiver,sender);   //离线则存入用户离线消息列表 
+    InsertToMessagelog(friends,sender,buf,1);    //将信息写入发送者的聊天记录
     return MENU_SENDMESSAGE_I;
 }
+
 /*****************************************
  *
  * 函数功能：服务器端将信息传给接收者用户
@@ -193,7 +185,7 @@ int SendMessage(struct User_List *user,struct Friend *friends,char message[DATEL
     usleep(SENDDELAYTIME);
     if ((num = send(fd,message,strlen(message),0)) > 0)
     {
-        InsertToMessagelog(friends,name,message);   //将信息写入接收者聊天记录
+        InsertToMessagelog(friends,name,message,2);   //将信息写入接收者聊天记录
         return 0;
     }
     return -1;

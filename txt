@@ -1,0 +1,99 @@
+==26246== Memcheck, a memory error detector
+==26246== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
+==26246== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
+==26246== Command: ./a
+==26246== Parent PID: 10938
+==26246== 
+==26246== Thread 2:
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x3E78E49EE0: vfprintf (in /lib64/libc-2.14.1.so)
+==26246==    by 0x3E78EF641F: __vsnprintf_chk (in /lib64/libc-2.14.1.so)
+==26246==    by 0x3E7DE1B11C: _nc_printf_string (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x3E7DE1636E: vwprintw (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x3E7DE16618: printw (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x4041CE: Ser_DisplayFriendList (windows.c:528)
+==26246==    by 0x40252F: Display (server.c:233)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==26246==    by 0x404830: Ser_DisPlayMsg (windows.c:676)
+==26246==    by 0x402555: Display (server.c:234)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==26246==    by 0x404888: Ser_DisPlayMsg (windows.c:685)
+==26246==    by 0x402555: Display (server.c:234)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x3E78E4A26E: vfprintf (in /lib64/libc-2.14.1.so)
+==26246==    by 0x3E78EF641F: __vsnprintf_chk (in /lib64/libc-2.14.1.so)
+==26246==    by 0x3E7DE1B11C: _nc_printf_string (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x3E7DE1636E: vwprintw (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x3E7DE16618: printw (in /lib64/libncursesw.so.5.8)
+==26246==    by 0x40266C: Display (server.c:241)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Thread 4:
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x4057E5: CreateFriendList (user.c:528)
+==26246==    by 0x404D5F: AddUser (user.c:140)
+==26246==    by 0x401BE9: NewUserConnect (server.c:101)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Thread 2:
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x403FE6: Ser_DisplayUserList (windows.c:480)
+==26246==    by 0x4024D9: Display (server.c:231)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==26246==    by 0x405845: GetFriendList (user.c:558)
+==26246==    by 0x4024FA: Display (server.c:232)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x405848: GetFriendList (user.c:558)
+==26246==    by 0x4024FA: Display (server.c:232)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x4A079C2: strcmp (mc_replace_strmem.c:538)
+==26246==    by 0x404888: Ser_DisPlayMsg (windows.c:685)
+==26246==    by 0x402555: Display (server.c:234)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== Conditional jump or move depends on uninitialised value(s)
+==26246==    at 0x404923: Ser_DisPlayMsg (windows.c:696)
+==26246==    by 0x402555: Display (server.c:234)
+==26246==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==26246==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==26246== 
+==26246== 
+==26246== HEAP SUMMARY:
+==26246==     in use at exit: 373,085 bytes in 221 blocks
+==26246==   total heap usage: 258 allocs, 37 frees, 381,222 bytes allocated
+==26246== 
+==26246== LEAK SUMMARY:
+==26246==    definitely lost: 704 bytes in 1 blocks
+==26246==    indirectly lost: 0 bytes in 0 blocks
+==26246==      possibly lost: 816 bytes in 3 blocks
+==26246==    still reachable: 371,565 bytes in 217 blocks
+==26246==         suppressed: 0 bytes in 0 blocks
+==26246== Rerun with --leak-check=full to see details of leaked memory
+==26246== 
+==26246== For counts of detected and suppressed errors, rerun with: -v
+==26246== Use --track-origins=yes to see where uninitialised values come from
+==26246== ERROR SUMMARY: 2382 errors from 10 contexts (suppressed: 6 from 6)

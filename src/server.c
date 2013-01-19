@@ -23,7 +23,7 @@ int main()
     argv_dis = &argv_dis1;
     pthread_t pth_t[USER_MAX],pth,pth_dis;
 
-    int sign_menu = 0;    //功能标识
+    int sign_menu = 1;    //功能标识
     int num[4] = {0};     //各模块被选中成员编号
     int num_max[4] = {0};   //各模块最大成员数
     int logout = 0;   //退出标识
@@ -48,6 +48,7 @@ int main()
 
     argv_dis->user = user;
     argv_dis->num = num;
+    argv_dis->sign = &sign_menu;
     argv_dis->sumofuser = &sumofuser;
     argv_dis->name_cur = name_cur;
 
@@ -59,8 +60,8 @@ int main()
     fd_ = SerNetInit();
     keypad(stdscr,1);
     pthread_create(&pth_dis,NULL,Display,argv_dis);    //创建显示进程
-//    sleep(2);
-//    pthread_create(&pth,NULL,Keyboard,argv_key);    //创建键盘控制进程
+    sleep(2);
+    pthread_create(&pth,NULL,Keyboard,argv_key);    //创建键盘控制进程
 ALLOW: 
     while(sumofcli < USER_MAX)    //如果在线用户小于最大限制数，则继续接受用户连接
     {
@@ -87,11 +88,73 @@ ALLOW:
 void *NewUserConnect(void *argv1)
 {
     int num = 0;
+    char a[50][USERNAME_SIZE];
     struct User_List *cur;
     struct arg_ser_newconnect *argv;
     char FriendList[FRIENDS_MAX][USERNAME_SIZE];
     char message[DATELEN];
     argv = (struct arg_ser_newconnect *)argv1;
+    int z = 0;
+    char x[3];
+    strcpy(a[0],"3");
+    AddUser(argv->user,"2","2",1,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"4");
+    strcpy(a[1],"5");
+    AddUser(argv->user,"3","5",2,a);
+    while(z < 50)
+    {
+        x[1] = z%10 + '0';
+        x[0] = z/10 + '0';
+        strcpy(a[z],x);
+        z++;
+    }
+    AddUser(argv->user,"4","5",50,a);    
+    AddUser(argv->user,"5","5",50,a);
+    AddUser(argv->user,"6","5",50,a);
+    AddUser(argv->user,"7","5",50,a);
+    AddUser(argv->user,"8","5",50,a);
+    AddUser(argv->user,"9","5",50,a);
+    AddUser(argv->user,"10","5",50,a);
+    AddUser(argv->user,"11","5",50,a);
+    AddUser(argv->user,"12","5",50,a);
+    AddUser(argv->user,"13","5",50,a);
+    AddUser(argv->user,"14","5",50,a);
+    AddUser(argv->user,"15","5",50,a);
+    AddUser(argv->user,"16","5",50,a);
+    AddUser(argv->user,"17","5",50,a);
+    AddUser(argv->user,"18","5",50,a);
+    AddUser(argv->user,"19","5",50,a);
+    AddUser(argv->user,"20","5",50,a);
+    AddUser(argv->user,"21","5",50,a);
+    AddUser(argv->user,"22","5",50,a);
+    AddUser(argv->user,"23","5",50,a);
+    AddUser(argv->user,"24","5",50,a);
+    AddUser(argv->user,"25","5",50,a);
+    AddUser(argv->user,"26","5",50,a);
+    AddUser(argv->user,"27","5",50,a);
+    AddUser(argv->user,"28","5",50,a);
+    AddUser(argv->user,"29","5",50,a);
+    AddUser(argv->user,"30","5",50,a);
+    AddUser(argv->user,"31","5",50,a);
+    AddUser(argv->user,"32","5",50,a);
+    AddUser(argv->user,"33","5",50,a);
+    AddUser(argv->user,"34","5",50,a);
+    AddUser(argv->user,"35","5",50,a);
+    AddUser(argv->user,"36","5",50,a);
+    AddUser(argv->user,"37","5",50,a);
+    AddUser(argv->user,"38","5",50,a);
+    AddUser(argv->user,"39","5",50,a);
+    AddUser(argv->user,"40","5",50,a);
+    AddUser(argv->user,"41","5",50,a);
+    AddUser(argv->user,"42","5",50,a);
+    AddUser(argv->user,"43","5",50,a);
+    AddUser(argv->user,"44","5",50,a);
+    AddUser(argv->user,"45","5",50,a);
+    AddUser(argv->user,"46","5",50,a);
+    AddUser(argv->user,"47","5",50,a);
+
+
 
 loop:
     cur = argv->user;
@@ -137,16 +200,12 @@ loop:
 //        SendOffLineMessage(cur);    //发送离线消息
         usleep(SENDDELAYTIME);     //发送后延时
 //        pthread_mutex_unlock(&mut);
-    
         while(1)
         {
 //            pthread_mutex_lock(&mut);
             memset(receiver,0x0,sizeof(receiver));
             memset(message,0x0,sizeof(message));
             num = RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
-//            move(30,30);
-//            printw("聊天记录:%s",cur->user.friends.messagelog);
-//            refresh();
             if (MENU_ADDFRIEND_I == num)   //添加好友
             {
                 Recv(*argv->fd,receiver);   //接收欲添加的好友用户名
@@ -160,13 +219,11 @@ loop:
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {
                 move(32,30);
-                printw("                           ");
+                printw("                                ");
                 move(32,30);
-                printw("接收到：%d - %s - %s",num,receiver,message);
+                printw("接收到：%s - %d - %s - %s Online:%d",cur->user.name,num,receiver,message,OnLine(argv->user,receiver,1));
                 refresh();
-                sleep(2);
-//              dd  RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
-                if (OnLine(argv->user,receiver,1))    //判断接收人是否在线
+                if (1 == OnLine(argv->user,receiver,1))    //判断接收人是否在线
                     SendMessage(argv->user,&cur->user.friends,message,receiver);   //在线则直接发送给用户
                 else
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
@@ -195,8 +252,6 @@ void *Display(void *argv1)
 {
     struct arg_ser_dis *argv2;
     struct User_List *user;
-    argv2 = (struct arg_ser_dis *)argv1;
-//    user = (struct User_List *)argv->user;
     int x = 0,y = 0;
     char userlist[200][USERNAME_SIZE];
     char friendlist[200][USERNAME_SIZE];
@@ -207,36 +262,37 @@ void *Display(void *argv1)
     x = 0;
     sleep(1);
     clear();
+    int x1,y1;
+    leaveok(stdscr,1);
+    noecho();
     while(1)
     {
-//        pthread_mutex_lock(&mut);
-//        if (*(argv->dis) == 1)
+        clear();
+        refresh();
+        argv2 = (struct arg_ser_dis *)argv1;
         {
 //            if (dis_temp == 0)
 //                clear();   //清屏
             Ser_windows(&x,&y);   //初始化窗口界面
             memset(userlist,0x0,sizeof(userlist));
             memset(friendlist,0x0,sizeof(friendlist));
-//            sleep(15);
             *argv2->sumofuser = GetUserList(argv2->user,userlist);    //获取用户列表
-//            move(10,40);
-//            printw("列表:%s - %s - %s - %s",userlist[1],userlist[2],userlist[3],userlist[4]);
             GetOnline(argv2->user,online_sign);   //获取用户在线状态
-//            move(12,40);
-//            printw("在线:%d - %d - %d - %d",online_sign[1],online_sign[2],online_sign[3],online_sign[4]);
-            Ser_DisplayUserList(x,y,userlist,/*argv2->num[0]*/1,/**argv2->sumofuser*/3,online_sign,argv2->name_cur);    //显示用户列表
+            Ser_DisplayUserList(x,y,userlist,argv2->num[1],*argv2->sumofuser,online_sign,argv2->name_cur);    //显示用户列表
             sumoffriends = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
-            Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],sumoffriends,friend_cur);   //显示好友列表 
-//            *argv->dis = 0;
+            Ser_DisplayFriendList(x,y,friendlist,argv2->num[2],sumoffriends,friend_cur);   //显示好友列表 
+            Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
+            getyx(stdscr,y1,x1);
+            move(1,2);
+            printw("sign - num: 0 - 1 - 2 - 3");
+            move(2,2);
+            printw("                                                                                    ");
+            move(2,2);
+            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %s",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],*argv2->sumofuser,friendlist[2]);
             refresh();
-            sleep(1);
+            move(y1,x1);
+            usleep(100000);
         }
-//        else
-        {
-//            sleep(1);
-        }
-//        pthread_mutex_unlock(&mut);
-//            sleep(1);
     }
     pthread_exit(NULL);
 }
@@ -245,7 +301,6 @@ void *Keyboard(void *argv1)
 {
     struct arg_ser_key *argv;
     argv = (struct arg_ser_key *)argv1;
-//    keypad(stdscr,1);
     KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign);
     pthread_exit(NULL);
 }

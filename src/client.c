@@ -6,6 +6,7 @@
 
 void *Keyboard(void *argv1);
 void *Display(void *argv1);
+void *RecvMsg(void *argv1);
 
 int main()
 {
@@ -14,7 +15,7 @@ int main()
     struct arg_recv argv_recv1,*argv_recv;
     int fd = 0;
     int x = 0,y = 0;
-    pthread_t pth_t,pth_dis;
+    pthread_t pth_t,pth_dis,pth_recv;
     char message_recv[DATELEN];    //信息接收缓冲区
     char message_send[DATELEN];   //信息发送缓冲区
     char name[USERNAME_SIZE];     //用户名缓冲区
@@ -70,9 +71,7 @@ loop:
     message_recv[0] = sign + '0';
     message_recv[1] = '\0';
     Send(fd,message_recv);    //发送选项
-    move(1,10);
-    printw("sign：%d",sign);
-    refresh();
+    usleep(SENDDELAYTIME);
     if (1 == sign)    //登陆
         Cli_Login(x,y,name,passwd);   //进入登陆界面，并返回用户名、密码
     else if (2 == sign)    //注册
@@ -96,20 +95,21 @@ loop:
         goto loop;
     if (0 == strcmp(message_recv,LOGIN_SUCCESS))    //登录成功
     {
+        int num = 0;
         clear();
-        pthread_create(&pth_dis,NULL,Display,argv_dis);
+        pthread_create(&pth_dis,NULL,Display,argv_dis);   //创建显示线程
         pthread_create(&pth_t,NULL,Keyboard,argv_key);  //创建键盘控制线程
-        char str[USERNAME_SIZE] = "2";
-        int num1 = 0;
+        pthread_create(&pth_recv,NULL,RecvMsg,argv_recv);  //创建接收信息线程
         while(1)
         {
             if (message_sign == 1)
             {
+                num++;
 //                Send(fd,MENU_SENDMESSAGE);
                 send(fd,MENU_SENDMESSAGE,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
 //                Send(fd,"2");
-                num1 = send(fd,str,USERNAME_SIZE*sizeof(char),0);
+                send(fd,"2",USERNAME_SIZE*sizeof(char),0);
                 usleep(SENDDELAYTIME);
 //                Send(fd,message_send);
                 send(fd,message_send,DATELEN*sizeof(char),0);
@@ -117,10 +117,11 @@ loop:
                 move(y-4,18);
                 printw("                         ");
                 move(y-4,18);
-                printw("发送成功:%d - %s",num1,message_send);
+                printw("发送成功:%d - %s",num,message_send);
                 refresh();
                 message_sign = 0;
             }
+            usleep(SENDDELAYTIME*1000);
 
 /*            move(31,20);
             printw("dis:%d - num[0]:%d - num[1]:%d - num[2]:%d - sign:%d - logout:%d",dis,num[0],num[1],num[2],sign,logout);
@@ -157,8 +158,7 @@ void *Display(void *argv1)
     while(1)
     {
         Cli_Windows(&x,&y);   //客户端界面框架
-        Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],num_max[0],argv->name,argv->onlinesign);   //显示好友列表
-        
+        Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],num_max[0],argv->name,argv->onlinesign);   //显示好友列表 
         sleep(1);
     } 
 }
@@ -168,7 +168,7 @@ void *Display(void *argv1)
  * 函数功能：客户端接收信息线程
  * 
  * *************************/
-void *RecvMessage_(void *argv1)
+void *RecvMsg(void *argv1)
 {
     struct arg_recv *argv;
     argv = (struct arg_recv *)argv1;
@@ -181,9 +181,7 @@ void *RecvMessage_(void *argv1)
         Recv(*argv->fd,datetype_s);     //接收数据类型
         datetype = atoi(datetype_s);   //将字符串转换为整形
         if (DATETYPE_FRIENDSLIST_I == datetype)      //接收好友列表
-        {
             recv(*argv->fd,argv->friendslist,sizeof(argv->friendslist),0);  //接收好友列表
-        }
         else if (DATETYPE_FRIENDSINFO_I == datetype)  //好友信息
         {
             
@@ -191,7 +189,9 @@ void *RecvMessage_(void *argv1)
         else if (DATETYPE_COMMUNICATE_I == datetype)  //通信信息
         {
             Recv(*argv->fd,argv->message);
-            move(26,30);
+            move(30,4);
+	        printw("                          ");
+	        move(30,4);
             printw("接收到：%s",argv->message);
             refresh();
         }

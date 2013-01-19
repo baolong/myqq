@@ -10,6 +10,7 @@
 
 struct MessageLog
 {
+    int sign;                    //消息归属标识
     char message[DATELEN];            //消息记录
     struct MessageLog *front;
     struct MessageLog *next;
@@ -71,7 +72,7 @@ int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE]);
 int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SIZE]);
 int Itoa(int num,char str[DATELEN]);
 int Atoi(char str[]);
-int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN]);
+int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char message[DATELEN],int sign);
 int GetSocket(struct User_List *user,char name[USERNAME_SIZE]);
 int SetSocket(struct User_List *user,char name[USERNAME_SIZE],int fd);
 int GetName(struct User_List *user,int fd,char name[USERNAME_SIZE]);

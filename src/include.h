@@ -79,6 +79,7 @@ struct arg_ser_dis    //显示进程参数结构
 {
     struct User_List *user;    //用户链表
     int *num;                 //被选中用户序号
+    int *sign;
     int *sumofuser;           //总用户数
     char *name_cur;           //返回被选中用户名
 };
