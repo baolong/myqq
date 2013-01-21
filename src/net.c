@@ -125,7 +125,7 @@ int Send(int fp,char *date)
     char temp[DATELEN];
     memset(temp,0x0,sizeof(temp));
     strcpy(temp,date);
-    num = send(fp,temp,sizeof(temp),0);
+    num = send(fp,temp,DATELEN*sizeof(char),0);
     return num*DATELEN;
 }
 
@@ -142,6 +142,7 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
 {
     unsigned int num = 0;
     struct MessageLog *msglog = NULL;
+    struct User_List *recv_user = user;
     char sign[2];
     memset(sign,0x0,sizeof(sign));
     memset(receiver,0x0,sizeof(receiver));
@@ -154,7 +155,13 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
         return -1;
     if ((recv(fp,buf,DATELEN*sizeof(char),0)) < 0)     //接收信息内容
         return -1;
-    InsertToMessagelog(friends,sender,buf,1);    //将信息写入发送者的聊天记录
+    while(NULL != recv_user)
+    {
+        if (0 == strcmp(recv_user->user.name,receiver))
+            break;
+        recv_user = recv_user->next;
+    }
+    InsertToMessagelog(&recv_user->user.friends,sender,buf,1);    //将信息写入发送者的聊天记录
     return MENU_SENDMESSAGE_I;
 }
 

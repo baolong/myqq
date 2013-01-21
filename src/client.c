@@ -2,6 +2,7 @@
 #include "net.h"
 #include "windows.h"
 #include <pthread.h>
+#include <stdlib.h>
 #include "include.h"
 
 void *Keyboard(void *argv1);
@@ -30,7 +31,8 @@ int main()
     int num[2] = {0};   //各模块的被选中对象的编号
     int num_max[2] = {0};   //各模块对大对象数
     int logout  = 0;   //退出标识
-
+    int num_temp = 0; 
+    int sumoffriends = 0;
     //进行相关的初始化
     argv_key = &argv_key1;
     argv_dis = &argv_dis1;
@@ -46,13 +48,24 @@ int main()
     argv_dis->name = name;
     argv_dis->sign = &sign;
     argv_dis->num = num;
-    argv_dis->friendslist = friendslist;
+    while(num_temp < FRIENDS_MAX)
+    {
+        argv_dis->friendslist[num_temp] = friendslist[num_temp];
+        num_temp++;
+    }
     argv_dis->onlinesign = onlinesign;
     
     argv_recv->fd = &fd;
     argv_recv->sender = sender;
     argv_recv->message = message_recv;
-    argv_recv->friendslist = friendslist;
+    argv_recv->sumoffriends = &sumoffriends;
+
+    num_temp = 0;
+    while(num_temp < FRIENDS_MAX)
+    {
+        argv_recv->friendslist[num_temp] = friendslist[num_temp];
+        num_temp++;
+    }
     argv_recv->onlinesign = onlinesign;
     argv_recv->message_sign = &message_sign;
 
@@ -174,14 +187,26 @@ void *RecvMsg(void *argv1)
     argv = (struct arg_recv *)argv1;
     char datetype_s[2];
     int datetype = 0;
-
+    int numoffriend = 0;
     while(1)
     {
         memset(datetype_s,0x0,sizeof(datetype_s));
         Recv(*argv->fd,datetype_s);     //接收数据类型
         datetype = atoi(datetype_s);   //将字符串转换为整形
         if (DATETYPE_FRIENDSLIST_I == datetype)      //接收好友列表
-            recv(*argv->fd,argv->friendslist,sizeof(argv->friendslist),0);  //接收好友列表
+        {
+            Recv(*argv->fd,argv->message);
+            *argv->sumoffriends = atoi(argv->message);
+            move(30,33);
+            printw("sumoffriends:%d",*argv->sumoffriends);
+            refresh();
+            sleep(2);
+            while(numoffriend < *argv->sumoffriends)
+            {
+                recv(*argv->fd,argv->friendslist[numoffriend],USERNAME_SIZE*sizeof(char),0);  //接收好友列表
+                numoffriend++;
+            }
+        }
         else if (DATETYPE_FRIENDSINFO_I == datetype)  //好友信息
         {
             

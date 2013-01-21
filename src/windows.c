@@ -332,7 +332,7 @@ int Ser_windows(int *x,int *y)
  *         失败 - -1
  *
  * ***************************/
-int Cli_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int sum,char name[USERNAME_SIZE],int sign[100])
+int Cli_DisplayFriendList(int x,int y,char *friends[],int num,int sum,char name[USERNAME_SIZE],int sign[100])
 {
     int num_ = 6;     //用于一屏显示好友个数的计数
     int temp = 0;   //好友在好友列表中的序号
@@ -597,12 +597,18 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             switch(key)
             {
                 case KEY_UP:
-                    if (0 != num[*sign])
+                    if (0 < num[*sign])
                         num[*sign]--;
+                    if (2 != *sign)
+                        num[2] = 0;
                     break;
                 case KEY_DOWN:
-                    if (num[*sign] != max_num[*sign])
+                    if (num[*sign] < max_num[*sign - 1])
                         num[*sign]++;
+                    else if (num[*sign] > max_num[*sign - 1])
+                        num[*sign] = max_num[*sign - 1];
+                    if (2 != *sign)
+                        num[2] = 0;
                     break;
                 case '1':
                     *sign = 0;
@@ -700,7 +706,7 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
             move(num + 9,33);
             printw("%+*s",x - 54," ");
             move(num + 9,33);
-            if (1 == msglog->sign)
+            if (2 == msglog->sign) //若是自身发言，显示在右边
                 printw("%+*s",x - 54,msglog->message);
             else
                 printw("%-*s",x - 54,msglog->message);

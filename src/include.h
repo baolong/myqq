@@ -30,7 +30,7 @@ struct arg_dis    //显示线程参数结构体
     char *name;    //返回选中用户名
     int *sign;     //功能选项
     int *num;      //选中用户序列号
-    char (*friendslist)[USERNAME_SIZE];    //好友列表
+    char *friendslist[USER_MAX];    //好友列表
     int *onlinesign;    //在线标志
 };
 
@@ -39,7 +39,8 @@ struct arg_recv   //网络接收线程参数结构体
     int *fd;     //套接口描述符
     char *sender;   //消息发送者
     char *message;  //接收消息缓冲区
-    char (*friendslist)[USERNAME_SIZE];  //好友列表
+    char *friendslist[USER_MAX];  //好友列表
+    int *sumoffriends;
     int *message_sign;
     int *onlinesign;    //在线标识
 };
@@ -80,7 +81,7 @@ struct arg_ser_dis    //显示进程参数结构
     struct User_List *user;    //用户链表
     int *num;                 //被选中用户序号
     int *sign;
-    int *sumofuser;           //总用户数
+    int *num_max;           //各列表对象最大数
     char *name_cur;           //返回被选中用户名
 };
 

@@ -13,7 +13,7 @@
 #define PORT 5556      //端口
 #define CLIENTNUM 100   //最大用户连接数
 #define DATELEN 128*2     //单次数据长度
-#define IP "192.168.1.7"     //服务器IP地址
+#define IP "192.168.1.4"     //服务器IP地址
 
 int SerNetInit(void);
 int CliNetInit(void);

@@ -49,7 +49,7 @@ int main()
     argv_dis->user = user;
     argv_dis->num = num;
     argv_dis->sign = &sign_menu;
-    argv_dis->sumofuser = &sumofuser;
+    argv_dis->num_max = num_max;
     argv_dis->name_cur = name_cur;
 
     WindowInit();
@@ -88,76 +88,24 @@ ALLOW:
 void *NewUserConnect(void *argv1)
 {
     int num = 0;
-    char a[50][USERNAME_SIZE];
-    struct User_List *cur;
+    int nunoffriend = 0;
+    struct User_List *cur,*recv_user;;
     struct arg_ser_newconnect *argv;
     char FriendList[FRIENDS_MAX][USERNAME_SIZE];
     char message[DATELEN];
+    char a[10][USERNAME_SIZE];
     argv = (struct arg_ser_newconnect *)argv1;
-    int z = 0;
-    char x[3];
+    
     strcpy(a[0],"3");
     AddUser(argv->user,"2","2",1,a);
     memset(a,0x0,sizeof(a));
-    strcpy(a[0],"4");
+    strcpy(a[0],"2");
     strcpy(a[1],"5");
-    AddUser(argv->user,"3","5",2,a);
-    while(z < 50)
-    {
-        x[1] = z%10 + '0';
-        x[0] = z/10 + '0';
-        strcpy(a[z],x);
-        z++;
-    }
-    AddUser(argv->user,"4","5",50,a);    
-    AddUser(argv->user,"5","5",50,a);
-    AddUser(argv->user,"6","5",50,a);
-    AddUser(argv->user,"7","5",50,a);
-    AddUser(argv->user,"8","5",50,a);
-    AddUser(argv->user,"9","5",50,a);
-    AddUser(argv->user,"10","5",50,a);
-    AddUser(argv->user,"11","5",50,a);
-    AddUser(argv->user,"12","5",50,a);
-    AddUser(argv->user,"13","5",50,a);
-    AddUser(argv->user,"14","5",50,a);
-    AddUser(argv->user,"15","5",50,a);
-    AddUser(argv->user,"16","5",50,a);
-    AddUser(argv->user,"17","5",50,a);
-    AddUser(argv->user,"18","5",50,a);
-    AddUser(argv->user,"19","5",50,a);
-    AddUser(argv->user,"20","5",50,a);
-    AddUser(argv->user,"21","5",50,a);
-    AddUser(argv->user,"22","5",50,a);
-    AddUser(argv->user,"23","5",50,a);
-    AddUser(argv->user,"24","5",50,a);
-    AddUser(argv->user,"25","5",50,a);
-    AddUser(argv->user,"26","5",50,a);
-    AddUser(argv->user,"27","5",50,a);
-    AddUser(argv->user,"28","5",50,a);
-    AddUser(argv->user,"29","5",50,a);
-    AddUser(argv->user,"30","5",50,a);
-    AddUser(argv->user,"31","5",50,a);
-    AddUser(argv->user,"32","5",50,a);
-    AddUser(argv->user,"33","5",50,a);
-    AddUser(argv->user,"34","5",50,a);
-    AddUser(argv->user,"35","5",50,a);
-    AddUser(argv->user,"36","5",50,a);
-    AddUser(argv->user,"37","5",50,a);
-    AddUser(argv->user,"38","5",50,a);
-    AddUser(argv->user,"39","5",50,a);
-    AddUser(argv->user,"40","5",50,a);
-    AddUser(argv->user,"41","5",50,a);
-    AddUser(argv->user,"42","5",50,a);
-    AddUser(argv->user,"43","5",50,a);
-    AddUser(argv->user,"44","5",50,a);
-    AddUser(argv->user,"45","5",50,a);
-    AddUser(argv->user,"46","5",50,a);
-    AddUser(argv->user,"47","5",50,a);
-
-
+    AddUser(argv->user,"3","3",2,a);
 
 loop:
     cur = argv->user;
+    recv_user = argv->user;
     memset(FriendList,0x0,sizeof(FriendList));
     memset(argv->message,0x0,sizeof(argv->message));
     memset(argv->name,0x0,sizeof(argv->name));
@@ -191,12 +139,23 @@ loop:
         usleep(SENDDELAYTIME);
         while(0 != strcmp(cur->user.name,argv->name) && NULL != cur->next)
             cur = cur->next;
-        GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表
-//        Send(*argv->fd,FriendList);
-//        Send(*argv->fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
+/*        GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表 
+        Send(*argv->fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
         usleep(SENDDELAYTIME);
-//        send(*argv->fd,FriendList,sizeof(FriendList),0);  //发送好友列表
-        usleep(SENDDELAYTIME);    //发送后延时
+        memset(message,0x0,sizeof(message));
+        sprintf(message,"%d",cur->user.numoffriend);
+        move(2,53);
+        printw("numoffriend:%s",message);
+        refresh();
+        sleep(2);
+        Send(*argv->fd,message);
+        usleep(SENDDELAYTIME);
+        while(numoffriend < cur->user.numoffriend)
+        {
+            send(*argv->fd,FriendList[numoffriend],USERNAME_SIZE*sizeof(char),0);  //发送好友列表
+            usleep(SENDDELAYTIME);    //发送后延时
+            numoffriend++;
+        }*/
 //        SendOffLineMessage(cur);    //发送离线消息
         usleep(SENDDELAYTIME);     //发送后延时
 //        pthread_mutex_unlock(&mut);
@@ -224,7 +183,9 @@ loop:
                 printw("接收到：%s - %d - %s - %s Online:%d",cur->user.name,num,receiver,message,OnLine(argv->user,receiver,1));
                 refresh();
                 if (1 == OnLine(argv->user,receiver,1))    //判断接收人是否在线
+                {
                     SendMessage(argv->user,&cur->user.friends,message,receiver);   //在线则直接发送给用户
+                }
                 else
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
             }
@@ -276,11 +237,11 @@ void *Display(void *argv1)
             Ser_windows(&x,&y);   //初始化窗口界面
             memset(userlist,0x0,sizeof(userlist));
             memset(friendlist,0x0,sizeof(friendlist));
-            *argv2->sumofuser = GetUserList(argv2->user,userlist);    //获取用户列表
+            argv2->num_max[0] = GetUserList(argv2->user,userlist);    //获取用户列表
             GetOnline(argv2->user,online_sign);   //获取用户在线状态
-            Ser_DisplayUserList(x,y,userlist,argv2->num[1],*argv2->sumofuser,online_sign,argv2->name_cur);    //显示用户列表
-            sumoffriends = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
-            Ser_DisplayFriendList(x,y,friendlist,argv2->num[2],sumoffriends,friend_cur);   //显示好友列表 
+            Ser_DisplayUserList(x,y,userlist,argv2->num[1],argv2->num_max[0],online_sign,argv2->name_cur);    //显示用户列表
+            argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
+            Ser_DisplayFriendList(x,y,friendlist,argv2->num[2],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
             getyx(stdscr,y1,x1);
             move(1,2);
@@ -288,7 +249,7 @@ void *Display(void *argv1)
             move(2,2);
             printw("                                                                                    ");
             move(2,2);
-            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %s",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],*argv2->sumofuser,friendlist[2]);
+            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %d",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],argv2->num_max[0],argv2->num_max[1]);
             refresh();
             move(y1,x1);
             usleep(100000);
