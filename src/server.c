@@ -23,7 +23,7 @@ int main()
     argv_dis = &argv_dis1;
     pthread_t pth_t[USER_MAX],pth,pth_dis;
 
-    int sign_menu = 1;    //功能标识
+    int sign_menu = 0;    //功能标识
     int num[4] = {0};     //各模块被选中成员编号
     int num_max[4] = {0};   //各模块最大成员数
     int logout = 0;   //退出标识
@@ -139,26 +139,34 @@ loop:
         usleep(SENDDELAYTIME);
         while(0 != strcmp(cur->user.name,argv->name) && NULL != cur->next)
             cur = cur->next;
-/*        GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表 
+
+        /**************
+         * 发送好友列表
+         * ************/
+        GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表 
         Send(*argv->fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
         usleep(SENDDELAYTIME);
         memset(message,0x0,sizeof(message));
         sprintf(message,"%d",cur->user.numoffriend);
-        move(2,53);
-        printw("numoffriend:%s",message);
-        refresh();
-        sleep(2);
         Send(*argv->fd,message);
         usleep(SENDDELAYTIME);
-        while(numoffriend < cur->user.numoffriend)
+        numoffriend = 1;
+        while(numoffriend <= cur->user.numoffriend)
         {
-            send(*argv->fd,FriendList[numoffriend],USERNAME_SIZE*sizeof(char),0);  //发送好友列表
+            Send(*argv->fd,FriendList[numoffriend]);
             usleep(SENDDELAYTIME);    //发送后延时
             numoffriend++;
-        }*/
+        }
+
+        /******************
+         * 发送用户离线消息
+         * ***************/
 //        SendOffLineMessage(cur);    //发送离线消息
         usleep(SENDDELAYTIME);     //发送后延时
-//        pthread_mutex_unlock(&mut);
+
+        /**************
+         * 正式进入服务
+         * ***********/
         while(1)
         {
 //            pthread_mutex_lock(&mut);
@@ -234,14 +242,14 @@ void *Display(void *argv1)
         {
 //            if (dis_temp == 0)
 //                clear();   //清屏
-            Ser_windows(&x,&y);   //初始化窗口界面
+            Ser_windows(&x,&y);   //初始化窗口界
             memset(userlist,0x0,sizeof(userlist));
             memset(friendlist,0x0,sizeof(friendlist));
             argv2->num_max[0] = GetUserList(argv2->user,userlist);    //获取用户列表
             GetOnline(argv2->user,online_sign);   //获取用户在线状态
-            Ser_DisplayUserList(x,y,userlist,argv2->num[1],argv2->num_max[0],online_sign,argv2->name_cur);    //显示用户列表
+            Ser_DisplayUserList(x,y,userlist,argv2->num[0],argv2->num_max[0],online_sign,argv2->name_cur);    //显示用户列表
             argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
-            Ser_DisplayFriendList(x,y,friendlist,argv2->num[2],argv2->num_max[1],friend_cur);   //显示好友列表 
+            Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
             getyx(stdscr,y1,x1);
             move(1,2);

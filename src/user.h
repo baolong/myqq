@@ -80,5 +80,5 @@ int GetTime(char time_str[21]);
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
 int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
 int GetOnline(struct User_List *user,int online[200]);
-
+int Cli_AddFriendlist(struct Friend *friendlist,char friendsname[USERNAME_SIZE]);
 #endif

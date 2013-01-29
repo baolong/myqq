@@ -790,6 +790,27 @@ int GetOnline(struct User_List *user,int online[200])
     return -1;
 }
 
+/*********************************
+ *
+ * 函数功能：客户端好友列表数据库
+ *           添加好友成员
+ * 
+ * *******************************/
+int Cli_AddFriendlist(struct Friend *friendlist,char friendsname[USERNAME_SIZE])
+{
+    struct Friend *newfriend = NULL;
+    newfriend = (struct Friend *)malloc(sizeof(struct Friend));
+    strcpy(newfriend->name,friendsname);
+    while(NULL != friendlist->next)
+        friendlist = friendlist->next;
+    friendlist->next = newfriend;
+    newfriend->front = friendlist;
+    newfriend->next = NULL;
+    return 0;
+}
+
+
+
 
 
 

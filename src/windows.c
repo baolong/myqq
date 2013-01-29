@@ -247,8 +247,6 @@ int Cli_Windows(int *x,int *y)
     hline(ACS_HLINE,*x - 33);
     attroff(COLOR_PAIR(1));
     refresh();
-//    refresh();
-//    move(*y-2,33);
     move(y1,x1);
     return 0;
 }
@@ -340,35 +338,21 @@ int Cli_DisplayFriendList(int x,int y,char *friends[],int num,int sum,char name[
     int x1,y1;
 //    char a[5];
     char name_temp[USERNAME_SIZE];
-    if (num >= sum)
+    strcpy(friends[0],"整体动态");
+    if (num > sum)
         return 0;
     if (num > (y - 7))    //如果选中的好友序号大于一屏所能显示的好友数
         temp = num - (y -7);    //则将该好友显示在最低
-    while(num_ <= (y - 3))     
+    while(num_ <= (y - 1))     
     {
         if (strcmp(friends[temp],"") != 0)
         {
-//            len = 0;
-//            strcpy(a,"");
-            strcpy(name_temp,"");
-            len = strlen(friends[temp]);
-//            len = wcswidth(friends[temp],1000);
-//            a[0] = len/10+'0';
-//            a[1] = len%10+'0';
-//            a[2] = '\0';
-//            mvaddstr(num_,40,a);
-            strcpy(name_temp,friends[temp]);
-            while(len <= 13)
-            {
-                name_temp[len] = ' ';
-                len++;
-            }
-            name_temp[len] = '\0';
             getyx(stdscr,y1,x1);   //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
+                move(num_,2);
                 attron(COLOR_PAIR(2));
-                mvaddstr(num_,2,name_temp);
+                printw("[%-*s %d",13,friends[temp],num_);
                 attroff(COLOR_PAIR(2));
                 strcpy(name,friends[temp]);
             }
@@ -376,15 +360,17 @@ int Cli_DisplayFriendList(int x,int y,char *friends[],int num,int sum,char name[
             {
                 if (sign[temp] == 1)
                 {
-                    attron(COLOR_PAIR(1));
-                    mvaddstr(num_,2,name_temp);
-                    attroff(COLOR_PAIR(1));
+                    move(num_,2);
+                    attron(COLOR_PAIR(4));
+                    printw("[%-*s %d",13,friends[temp],num_);
+                    attroff(COLOR_PAIR(4));
                 }
                 else
                 {
-                    attron(COLOR_PAIR(3));
-                    mvaddstr(num_,2,name_temp);
-                    attroff(COLOR_PAIR(3));
+                    move(num_,2);
+                    attron(COLOR_PAIR(5));
+                    printw("[%-*s %d",13,friends[temp],num_);
+                    attroff(COLOR_PAIR(5));
                 }
             }
             refresh();
@@ -448,7 +434,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
     char name_temp[USERNAME_SIZE];
     num -= 1;
     strcpy(list[0],"整体动态");
-    if (num >= sum)
+    if (num > sum)
         return 0;
     if (num > (y - 8))    //如果选中的好友序号大于一屏所能显示的好友数
         temp = num - (y -8);    //则将该好友显示在最低
@@ -456,7 +442,7 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
     {
         if (strcmp(list[temp],"") != 0)
         {
-            strcpy(name_temp,"");
+/*            strcpy(name_temp,"");
             len = strlen(list[temp]);
             strcpy(name_temp,list[temp]);
             while(len <= 13)
@@ -464,29 +450,30 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
                 name_temp[len] = ' ';
                 len++;
             }
-            name_temp[len] = '\0';
+            name_temp[len] = '\0';*/
             getyx(stdscr,y1,x1);   //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
                 attron(COLOR_PAIR(2));
-                mvaddstr(cur,2,name_temp);
+                move(cur,1);
+                printw("%-*s",15,list[temp]);
                 attroff(COLOR_PAIR(2));
-                len =strlen(list[temp]);
                 strcpy(name,list[temp]);
-                name[len] = '\0';
             }
             else     //如果好友不是被选中的用户
             {
                 if (sign[temp] == 1)   //在线用户
                 {
                     attron(COLOR_PAIR(4));
-                    mvaddstr(cur,2,name_temp);
+                    move(cur,1);
+                    printw("%-*s",15,list[temp]);
                     attroff(COLOR_PAIR(4));
                 }
                 else      //离线用户
                 {
                     attron(COLOR_PAIR(5));
-                    mvaddstr(cur,2,name_temp);
+                    move(cur,1);
+                    printw("%-*s",15,list[temp]);
                     attroff(COLOR_PAIR(5));
                 }
             }
@@ -589,54 +576,57 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
     while(1)
     {
         GetSize(&x,&y);
-        if (0 != *sign)   //若功能不为聊天输入模式，则检测按键
+        if (3 != *sign)   //若功能不为聊天输入模式，则检测按键
         {
-            keypad(stdscr,1);
             key = 0;
+             
+            keypad(stdscr,1);
             key = getch();
+            keypad(stdscr,0);
             switch(key)
             {
                 case KEY_UP:
                     if (0 < num[*sign])
                         num[*sign]--;
-                    if (2 != *sign)
-                        num[2] = 0;
+                    if (1 != *sign)
+                        num[1] = 0;
                     break;
                 case KEY_DOWN:
-                    if (num[*sign] < max_num[*sign - 1])
+                    if (num[*sign] < max_num[*sign])
                         num[*sign]++;
-                    else if (num[*sign] > max_num[*sign - 1])
-                        num[*sign] = max_num[*sign - 1];
-                    if (2 != *sign)
-                        num[2] = 0;
+                    else if (num[*sign] > max_num[*sign])
+                        num[*sign] = max_num[*sign];
+                    if (1 != *sign)
+                        num[1] = 0;
                     break;
                 case '1':
-                    *sign = 0;
+                    *sign = 3;
                     break;
                 case '2':
-                    *sign = 1;
+                    *sign = 0;
                     break;
                 case '3':
-                    *sign = 2;
+                    *sign = 1;
                     break;
                 case '4':
-                    *sign = 3;
+                    *sign = 2;
                     break;
                 case 27:
                     *logout = 1;
             //     return 0;
             }
-            keypad(stdscr,0);
             usleep(1000);
         }
         else     //若功能选择为聊天呼入模式，则获取用户输入
         {
             while(0 != *message_sign);   //等待发送缓冲区为空
-            echo();
             move(y-2,17);
             printw("            ");
             move(y - 2,17);
+            echo();
+            keypad(stdscr,0);
             getstr(temp);
+            keypad(stdscr,1);
             noecho();
             if (0 == strcmp(temp,"q"))
                 *sign = 1;
@@ -726,6 +716,61 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
     refresh();
 }
 
+
+int Cli_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZE],char friendsname[USERNAME_SIZE])
+{
+    int msgdis_max = 20;
+    int num = 0;
+    struct User_List *temp = user;
+    struct Friend *friends = NULL;
+    struct MessageLog *msglog = NULL;
+    int x1,y1;
+    while(NULL != temp)    //寻找用户名
+    {
+        if (0 == strcmp(temp->user.name,username))
+            break;
+        if (NULL == temp->next)
+            return -1;
+        temp = temp->next;
+    }
+    friends = &(temp->user.friends);
+    while(NULL != friends)   //寻找对应好友
+    {
+        if (0 == strcmp(friends->name,friendsname))
+            break;
+        if (NULL == friends->next)
+            return -2;
+        friends = friends->next;
+    }
+    msglog = friends->messagelog.next;
+    int z = 10;
+    getyx(stdscr,y1,x1);   //获取光标当前位置
+    while(num < msgdis_max)
+    {
+        if (NULL != msglog)
+        {
+            move(num + 9,33);
+            printw("%+*s",x - 54," ");
+            move(num + 9,33);
+            if (2 == msglog->sign) //若是自身发言，显示在右边
+                printw("%+*s",x - 54,msglog->message);
+            else
+                printw("%-*s",x - 54,msglog->message);
+//            if (NULL == msglog->next)
+//                break;
+            msglog = msglog->next;
+            num++;
+        }
+        else
+        {
+            move(y1,x1);
+            refresh();
+            return 0;
+        }
+    }
+    move(y1,x1);
+    refresh();
+}
 
 
 

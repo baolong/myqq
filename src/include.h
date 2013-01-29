@@ -24,13 +24,14 @@
 #define MENU_ADDFRIEND_I            8
 #define MENU_SENDMESSAGE_I          9
 
-
 struct arg_dis    //显示线程参数结构体
 {
     char *name;    //返回选中用户名
+    char *name_loacl;
     int *sign;     //功能选项
     int *num;      //选中用户序列号
     char *friendslist[USER_MAX];    //好友列表
+    int *sumoffriends;
     int *onlinesign;    //在线标志
 };
 
