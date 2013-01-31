@@ -16,6 +16,15 @@ struct MessageLog
     struct MessageLog *next;
 };
 
+struct Cli_Friendslist
+{
+    char name[USERNAME_SIZE];
+    int online;
+    struct MessageLog messagelog;
+    struct Cli_Friendslist *front;
+    struct Cli_Friendslist *next;
+};
+
 struct Friend       //用户好友列表结构体
 {
     char name[USERNAME_SIZE];          //好友用户名
@@ -80,5 +89,5 @@ int GetTime(char time_str[21]);
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE]);
 int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
 int GetOnline(struct User_List *user,int online[200]);
-int Cli_AddFriendlist(struct Friend *friendlist,char friendsname[USERNAME_SIZE]);
+int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE]);
 #endif

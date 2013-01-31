@@ -1,0 +1,97 @@
+==14450== Memcheck, a memory error detector
+==14450== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
+==14450== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
+==14450== Command: ./a
+==14450== Parent PID: 24929
+==14450== 
+==14450== Thread 2:
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==14450==    by 0x404956: Ser_DisPlayMsg (windows.c:709)
+==14450==    by 0x40260F: Display (server.c:253)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==14450==    by 0x4049AE: Ser_DisPlayMsg (windows.c:718)
+==14450==    by 0x40260F: Display (server.c:253)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x3E78E4A26E: vfprintf (in /lib64/libc-2.14.1.so)
+==14450==    by 0x3E78EF641F: __vsnprintf_chk (in /lib64/libc-2.14.1.so)
+==14450==    by 0x3E7DE1B11C: _nc_printf_string (in /lib64/libncursesw.so.5.8)
+==14450==    by 0x3E7DE1636E: vwprintw (in /lib64/libncursesw.so.5.8)
+==14450==    by 0x3E7DE16618: printw (in /lib64/libncursesw.so.5.8)
+==14450==    by 0x40274A: Display (server.c:260)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Thread 4:
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x405AA9: CreateFriendList (user.c:528)
+==14450==    by 0x405023: AddUser (user.c:140)
+==14450==    by 0x401BCD: NewUserConnect (server.c:100)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Thread 2:
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x4040B9: Ser_DisplayUserList (windows.c:500)
+==14450==    by 0x40257D: Display (server.c:250)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==14450==    by 0x405B09: GetFriendList (user.c:558)
+==14450==    by 0x4025AA: Display (server.c:251)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Conditional jump or move depends on uninitialised value(s)
+==14450==    at 0x405B0C: GetFriendList (user.c:558)
+==14450==    by 0x4025AA: Display (server.c:251)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450== 
+==14450== Thread 4:
+==14450== Invalid read of size 8
+==14450==    at 0x405CB7: InsertToMessagelog (user.c:616)
+==14450==    by 0x40657E: RecvMessage (net.c:164)
+==14450==    by 0x4021CE: NewUserConnect (server.c:175)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450==  Address 0x160 is not stack'd, malloc'd or (recently) free'd
+==14450== 
+==14450== 
+==14450== Process terminating with default action of signal 11 (SIGSEGV)
+==14450==  Access not within mapped region at address 0x160
+==14450==    at 0x405CB7: InsertToMessagelog (user.c:616)
+==14450==    by 0x40657E: RecvMessage (net.c:164)
+==14450==    by 0x4021CE: NewUserConnect (server.c:175)
+==14450==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==14450==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==14450==  If you believe this happened as a result of a stack
+==14450==  overflow in your program's main thread (unlikely but
+==14450==  possible), you can try to increase the size of the
+==14450==  main thread stack using the --main-stacksize= flag.
+==14450==  The main thread stack size used in this run was 8388608.
+==14450== 
+==14450== HEAP SUMMARY:
+==14450==     in use at exit: 371,597 bytes in 219 blocks
+==14450==   total heap usage: 263 allocs, 44 frees, 381,116 bytes allocated
+==14450== 
+==14450== LEAK SUMMARY:
+==14450==    definitely lost: 984 bytes in 2 blocks
+==14450==    indirectly lost: 0 bytes in 0 blocks
+==14450==      possibly lost: 816 bytes in 3 blocks
+==14450==    still reachable: 369,797 bytes in 214 blocks
+==14450==         suppressed: 0 bytes in 0 blocks
+==14450== Rerun with --leak-check=full to see details of leaked memory
+==14450== 
+==14450== For counts of detected and suppressed errors, rerun with: -v
+==14450== Use --track-origins=yes to see where uninitialised values come from
+==14450== ERROR SUMMARY: 147 errors from 8 contexts (suppressed: 6 from 6)

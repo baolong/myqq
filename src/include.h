@@ -30,9 +30,8 @@ struct arg_dis    //显示线程参数结构体
     char *name_loacl;
     int *sign;     //功能选项
     int *num;      //选中用户序列号
-    char *friendslist[USER_MAX];    //好友列表
+    struct Cli_Friendslist *friendslist;    //好友列表
     int *sumoffriends;
-    int *onlinesign;    //在线标志
 };
 
 struct arg_recv   //网络接收线程参数结构体
@@ -40,10 +39,9 @@ struct arg_recv   //网络接收线程参数结构体
     int *fd;     //套接口描述符
     char *sender;   //消息发送者
     char *message;  //接收消息缓冲区
-    char *friendslist[USER_MAX];  //好友列表
+    struct Cli_Friendslist *friendslist;  //好友列表
     int *sumoffriends;
     int *message_sign;
-    int *onlinesign;    //在线标识
 };
 
 struct arg_key    //按键检测线程参数结构体

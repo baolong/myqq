@@ -60,7 +60,7 @@ int main()
     fd_ = SerNetInit();
     keypad(stdscr,1);
     pthread_create(&pth_dis,NULL,Display,argv_dis);    //创建显示进程
-    sleep(2);
+//    sleep(2);
     pthread_create(&pth,NULL,Keyboard,argv_key);    //创建键盘控制进程
 ALLOW: 
     while(sumofcli < USER_MAX)    //如果在线用户小于最大限制数，则继续接受用户连接
@@ -93,14 +93,14 @@ void *NewUserConnect(void *argv1)
     struct arg_ser_newconnect *argv;
     char FriendList[FRIENDS_MAX][USERNAME_SIZE];
     char message[DATELEN];
-    char a[10][USERNAME_SIZE];
+    char a[50][USERNAME_SIZE];
     argv = (struct arg_ser_newconnect *)argv1;
     
     strcpy(a[0],"3");
     AddUser(argv->user,"2","2",1,a);
     memset(a,0x0,sizeof(a));
     strcpy(a[0],"2");
-    strcpy(a[1],"5");
+    strcpy(a[1],"3");
     AddUser(argv->user,"3","3",2,a);
 
 loop:
@@ -115,10 +115,10 @@ loop:
     Recv(*argv->fd,argv->passwd);
     if (0 == strcmp(argv->message,"2"))   //注册用户
     {
+        unsigned int numoffriend = 0;
         pthread_mutex_lock(&mut);
         AddUser(argv->user,argv->name,argv->passwd,0,argv->temp);
         pthread_mutex_unlock(&mut);
-
         Send(*argv->fd,CREATEUSER_SUCCESS);
         goto loop;     //退出，重新登陆
     }
@@ -154,7 +154,12 @@ loop:
         while(numoffriend <= cur->user.numoffriend)
         {
             Send(*argv->fd,FriendList[numoffriend]);
+            char online[2];
+            online[0] = OnLine(argv->user,FriendList[numoffriend],1) + '0';
+            online[1] = '\0';
             usleep(SENDDELAYTIME);    //发送后延时
+            send(*argv->fd,online,sizeof(online),0);
+            usleep(SENDDELAYTIME);
             numoffriend++;
         }
 
@@ -257,7 +262,7 @@ void *Display(void *argv1)
             move(2,2);
             printw("                                                                                    ");
             move(2,2);
-            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %d",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],argv2->num_max[0],argv2->num_max[1]);
+            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %d - %s - %s",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],argv2->num_max[0],argv2->num_max[1],argv2->name_cur,friend_cur);
             refresh();
             move(y1,x1);
             usleep(100000);

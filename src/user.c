@@ -796,17 +796,39 @@ int GetOnline(struct User_List *user,int online[200])
  *           添加好友成员
  * 
  * *******************************/
-int Cli_AddFriendlist(struct Friend *friendlist,char friendsname[USERNAME_SIZE])
+int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE])
 {
-    struct Friend *newfriend = NULL;
-    newfriend = (struct Friend *)malloc(sizeof(struct Friend));
+    struct Cli_Friendslist *newfriend = NULL;
+    newfriend = (struct Cli_Friendslist *)malloc(sizeof(struct Cli_Friendslist));
     strcpy(newfriend->name,friendsname);
+    newfriend->online = 1;
     while(NULL != friendlist->next)
         friendlist = friendlist->next;
     friendlist->next = newfriend;
     newfriend->front = friendlist;
     newfriend->next = NULL;
     return 0;
+}
+
+int Cli_Online(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],int sign)
+{
+    if (NULL == friendlist->next)
+        return 1;
+    while(NULL != friendlist)
+    {
+        if (0 == strcmp(friendlist->name,friendsname))
+            break;
+        friendlist = friendlist->next;
+    }
+    if (NULL == friendlist)
+        return 1;
+    friendlist->online = sign;
+    return 0;
+}
+
+int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN])
+{
+    
 }
 
 

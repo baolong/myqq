@@ -15,8 +15,9 @@ int main()
     struct arg_key argv_key1,*argv_key;
     struct arg_dis argv_dis1,*argv_dis;
     struct arg_recv argv_recv1,*argv_recv;
-    struct Friend Friendlist,*friendlist;
+    struct Cli_Friendslist Friendlist,*friendlist;
     friendlist = &Friendlist;
+    friendlist = (struct Cli_Friendslist *)malloc(sizeof(struct Cli_Friendslist));
     int fd = 0;
     int x = 0,y = 0;
     pthread_t pth_t,pth_dis,pth_recv;
@@ -25,12 +26,10 @@ int main()
     char message_send[DATELEN];   //信息发送缓冲区
     char name[USERNAME_SIZE];     //用户名缓冲区
     char passwd[USERPASSWD_SIZE];   //用户密码缓冲区
-    char friendslist[USER_MAX][USERNAME_SIZE];   //好友列表
     char sender[USERNAME_SIZE];
     char receiver[USERNAME_SIZE];
 
-    int onlinesign[USER_MAX];   //好友在线状态
-    int message_sign = 1;  //发送缓冲区标识，0表示缓冲区为空
+    int message_sign = 0;  //发送缓冲区标识，0表示缓冲区为空
     int sign = 0;   //功能选择标识
     int num[4] = {0};   //各模块的被选中对象的编号
     int num_max[4] = {0};   //各模块对大对象数
@@ -55,25 +54,13 @@ int main()
     argv_dis->sign = &sign;
     argv_dis->num = num;
     argv_dis->sumoffriends = &num_max[0];
-    while(num_temp < FRIENDS_MAX)
-    {
-        argv_dis->friendslist[num_temp] = friendslist[num_temp];
-        num_temp++;
-    }
-    argv_dis->onlinesign = onlinesign;
-    
+    argv_dis->friendslist = friendlist;
+ 
     argv_recv->fd = &fd;
     argv_recv->sender = sender;
     argv_recv->message = message_recv;
     argv_recv->sumoffriends = &num_max[0];
-
-    num_temp = 0;
-    while(num_temp < FRIENDS_MAX)
-    {
-        argv_recv->friendslist[num_temp] = friendslist[num_temp];
-        num_temp++;
-    }
-    argv_recv->onlinesign = onlinesign;
+    argv_recv->friendslist = friendlist;
     argv_recv->message_sign = &message_sign;
 
     WindowInit();
@@ -108,9 +95,7 @@ loop:
     memset(message_recv,0x0,sizeof(message_recv));   //初始化message
     Recv(fd,message_recv);    //接收提示信息
     if (0 == strcmp(message_recv,CREATEUSER_SUCCESS))   //注册成功，返回登录
-    {
         goto loop;
-    }
     if (0 == strcmp(message_recv,LOGIN_PASSWORD_WRONG))
         goto loop;
     if (0 == strcmp(message_recv,LOGIN_SUCCESS))    //登录成功
@@ -125,7 +110,7 @@ loop:
             if (message_sign == 1)
             {
                 num++;
-//                Send(fd,MENU_SENDMESSAGE);
+                Send(fd,MENU_SENDMESSAGE);
                 send(fd,MENU_SENDMESSAGE,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
 //                Send(fd,"2");
@@ -134,11 +119,6 @@ loop:
 //                Send(fd,message_send);
                 send(fd,message_send,DATELEN*sizeof(char),0);
                 usleep(SENDDELAYTIME);
-/*                move(y-4,18);
-                printw("                         ");
-                move(y-4,18);
-                printw("发送成功:%d - %s",num,message_send);
-                refresh();*/
                 message_sign = 0;
             }
             usleep(SENDDELAYTIME*1000);
@@ -180,18 +160,8 @@ void *Display(void *argv1)
     {
         clear();
         Cli_Windows(&x,&y);   //客户端界面框架
-        Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],*argv->sumoffriends,argv->name,argv->onlinesign);   //显示好友列表 
-//        Cli_DisPlayMsg(x,y,argv->user,argv->name_loacl,argv->name);
-        leaveok(stdscr,1);
-        getyx(stdscr,y1,x1);
-        move(1,2);
-        printw("sign - 0  -  1 -  2 - 3");
-        move(2,2);
-        printw("                            ");
-        move(2,2);
-        printw(" %d -  %d - %d - %d -",*argv->sign,argv->num[0],argv->num[1],argv->num[2]);
-        refresh();
-        move(y1,x1);
+        Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],*argv->sumoffriends,argv->name);   //显示好友列表 
+        Cli_DisPlayMsg(x,y,argv->friendslist,argv->name);
         usleep(100000);
     } 
 }
@@ -214,21 +184,28 @@ void *RecvMsg(void *argv1)
         datetype = atoi(argv->message);   //将字符串转换为整形
         if (DATETYPE_FRIENDSLIST_I == datetype)      //接收好友列表
         {
+            char name[DATELEN];
+            char online[2];
+            int online1 = 0;
             memset(argv->message,0x0,DATELEN*sizeof(char));
-            Recv(*argv->fd,argv->message);
+            Recv(*argv->fd,argv->message);  //接收好友列表长度
             *argv->sumoffriends = atoi(argv->message);
             numoffriend = 0;
             while(numoffriend < *argv->sumoffriends)
             {
-                Recv(*argv->fd,argv->friendslist[numoffriend + 1]);  //接收好友列表
+                Recv(*argv->fd,name);  //接收好友列表
+                recv(*argv->fd,online,sizeof(online),0);
+                online1 = online[0] - '0';
+                Cli_AddFriendlist(argv->friendslist,name);
+                Cli_Online(argv->friendslist,name,online1);
                 numoffriend++;
             }
         }
-        else if (DATETYPE_FRIENDSINFO_I == datetype)  //好友信息
+        else if (DATETYPE_FRIENDSINFO_I == datetype)  //接收好友信息
         {
             
         }
-        else if (DATETYPE_COMMUNICATE_I == datetype)  //通信信息
+        else if (DATETYPE_COMMUNICATE_I == datetype)  //接收聊天信息
         {
             Recv(*argv->fd,argv->message);
         }

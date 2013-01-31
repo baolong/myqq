@@ -321,67 +321,102 @@ int Ser_windows(int *x,int *y)
  *
  * 函数功能：在对应区域显示好友列表
  * 参数：x,y - 窗口尺寸
- *       user - 用户列表
+ *       friendslist - 好友列表
  *       num - 被选中好友编号（从1开始）
- *       sum - 总用户数
+ *       sum - 好友户数
  *       name - 返回选中好友用户名
- *       sign - 好友在线标识 为1则在线，否则离线
  * 返回值：成功- 0
  *         失败 - -1
  *
  * ***************************/
-int Cli_DisplayFriendList(int x,int y,char *friends[],int num,int sum,char name[USERNAME_SIZE],int sign[100])
+int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int num,int sum,char name[USERNAME_SIZE])
 {
-    int num_ = 6;     //用于一屏显示好友个数的计数
-    int temp = 0;   //好友在好友列表中的序号
-    int len;
-    int x1,y1;
-//    char a[5];
-    char name_temp[USERNAME_SIZE];
-    strcpy(friends[0],"整体动态");
-    if (num > sum)
+    int cur = 0;
+    int temp = 0;
+    if (NULL == friendslist->next)
         return 0;
-    if (num > (y - 7))    //如果选中的好友序号大于一屏所能显示的好友数
-        temp = num - (y -7);    //则将该好友显示在最低
-    while(num_ <= (y - 1))     
+    if (num < y - 7)
     {
-        if (strcmp(friends[temp],"") != 0)
+        cur = 6;
+        while(cur < y - 1)
         {
-            getyx(stdscr,y1,x1);   //获取光标当前坐标
+            if (NULL == friendslist)
+                break;
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
-                move(num_,2);
                 attron(COLOR_PAIR(2));
-                printw("[%-*s %d",13,friends[temp],num_);
+                move(cur,1);
+                printw("%-*s",15,friendslist->name);
                 attroff(COLOR_PAIR(2));
-                strcpy(name,friends[temp]);
+                strcpy(name,friendslist->name);
             }
             else     //如果好友不是被选中的用户
             {
-                if (sign[temp] == 1)
+                if (friendslist->online == 1)   //在线用户
                 {
-                    move(num_,2);
                     attron(COLOR_PAIR(4));
-                    printw("[%-*s %d",13,friends[temp],num_);
+                    move(cur,1);
+                    printw("%-*s",15,friendslist->name);
                     attroff(COLOR_PAIR(4));
                 }
-                else
+                else      //离线用户
                 {
-                    move(num_,2);
                     attron(COLOR_PAIR(5));
-                    printw("[%-*s %d",13,friends[temp],num_);
+                    move(cur,1);
+                    printw("%-*s",15,friendslist->name);
                     attroff(COLOR_PAIR(5));
                 }
             }
             refresh();
-            move(y1,x1);
+            friendslist = friendslist->next;
+            cur++;
             temp++;
-            num_++;
         }
-        else
-            break;
     }
-//    refresh();
+    else
+    {
+        cur = y - 2;
+        while(temp < num && NULL != friendslist->next)
+        {
+            friendslist = friendslist->next;
+            temp++;
+        }
+        while(cur >= 6)
+        {
+            if (NULL == friendslist)
+                break;
+            if (temp == num)
+            {
+                attron(COLOR_PAIR(2));
+                move(cur,1);
+                printw("%-*s",15,friendslist->name);
+                attroff(COLOR_PAIR(2));
+                strcpy(name,friendslist->name);
+            }
+            else     //如果好友不是被选中的用户
+            {
+                if (friendslist->online == 1)   //在线用户
+                {
+                    attron(COLOR_PAIR(4));
+                    move(cur,1);
+                    printw("%-*s",15,friendslist->name);
+                    attroff(COLOR_PAIR(4));
+                }
+                else      //离线用户
+                {
+                    attron(COLOR_PAIR(5));
+                    move(cur,1);
+                    printw("%-*s",15,friendslist->name);
+                    attroff(COLOR_PAIR(5));
+                }
+            }
+            refresh();
+            friendslist = friendslist->front;
+            cur--;
+            temp--;
+               
+        }
+    }
 }
 
 /*************************************
@@ -663,7 +698,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
  * **************************/
 int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZE],char friendsname[USERNAME_SIZE])
 {
-    int msgdis_max = 20;
+    int msgdis_max = y - 7;
     int num = 0;
     struct User_List *temp = user;
     struct Friend *friends = NULL;
@@ -716,61 +751,67 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
     refresh();
 }
 
-
-int Cli_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZE],char friendsname[USERNAME_SIZE])
+/****************************************
+ *
+ * 函数功能：客户端显示聊天记录
+ *
+ * ************************************/
+int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsname[USERNAME_SIZE])
 {
     int msgdis_max = 20;
     int num = 0;
-    struct User_List *temp = user;
-    struct Friend *friends = NULL;
-    struct MessageLog *msglog = NULL;
-    int x1,y1;
-    while(NULL != temp)    //寻找用户名
+    int rows_cur = 0;
+    int sumofmsg = 0;
+    struct MessageLog *messagelog = NULL;
+    if (NULL == friendslist->next)
+        return 0;
+    while(NULL != friendslist)      //寻找对应好友
     {
-        if (0 == strcmp(temp->user.name,username))
+        if (0 == strcmp(friendslist->name,friendsname))
             break;
-        if (NULL == temp->next)
-            return -1;
-        temp = temp->next;
+        friendslist = friendslist->next;
     }
-    friends = &(temp->user.friends);
-    while(NULL != friends)   //寻找对应好友
+    if (NULL == friendslist)
+        return 0;
+    else
     {
-        if (0 == strcmp(friends->name,friendsname))
-            break;
-        if (NULL == friends->next)
-            return -2;
-        friends = friends->next;
-    }
-    msglog = friends->messagelog.next;
-    int z = 10;
-    getyx(stdscr,y1,x1);   //获取光标当前位置
-    while(num < msgdis_max)
-    {
-        if (NULL != msglog)
+        messagelog = &friendslist->messagelog;
+        while(NULL != messagelog->next)
         {
-            move(num + 9,33);
-            printw("%+*s",x - 54," ");
-            move(num + 9,33);
-            if (2 == msglog->sign) //若是自身发言，显示在右边
-                printw("%+*s",x - 54,msglog->message);
-            else
-                printw("%-*s",x - 54,msglog->message);
-//            if (NULL == msglog->next)
-//                break;
-            msglog = msglog->next;
-            num++;
+            messagelog = messagelog->next;
+            sumofmsg++;
+        }
+        if (sumofmsg > y - 7)
+        {
+            rows_cur = y - 2;
+            while(rows_cur >= 6)
+            {
+                move(rows_cur,20);
+                printw("%-*s",15,messagelog->message);
+                messagelog = messagelog->front;
+                rows_cur--;
+            }
         }
         else
         {
-            move(y1,x1);
-            refresh();
-            return 0;
+            rows_cur = 0;
+            while(rows_cur < y - 2)
+            {
+                if (NULL == messagelog)
+                    break;
+                move(rows_cur,20);
+                printw("%-*s",15,messagelog->message);
+                messagelog = messagelog->next;
+                rows_cur++;
+            }
         }
     }
-    move(y1,x1);
-    refresh();
 }
+
+
+
+
+
 
 
 
