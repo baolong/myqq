@@ -10,7 +10,7 @@
 
 struct MessageLog
 {
-    int sign;                    //消息归属标识
+    int owner;                    //消息归属标识
     char message[DATELEN];            //消息记录
     struct MessageLog *front;
     struct MessageLog *next;
@@ -90,4 +90,5 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
 int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
 int GetOnline(struct User_List *user,int online[200]);
 int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE]);
+int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN],int owner);
 #endif

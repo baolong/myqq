@@ -612,7 +612,7 @@ int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char mess
     newmessage->front = NULL;
     newmessage->next = NULL;
     strcpy(newmessage->message,message);
-    newmessage->sign = sign;
+    newmessage->owner = sign;
     if (NULL != friends->next)
     {
         friends = friends->next;
@@ -753,7 +753,7 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
     GetTime(time_str);          //获取当前时间
     strcpy(new->SendTime,time_str);     //写入当前时间
     move(35,20);
-    printw("离线：%s - %s - %s",new->message,new->Sender,user->user.offlinemessage.message);
+    printw("插入离线消息：%s - %s - %s",new->message,new->Sender,user->user.offlinemessage.message);
     refresh();
     user->user.offlinemessage.next = new;
     new->next = NULL;
@@ -826,10 +826,37 @@ int Cli_Online(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE
     return 0;
 }
 
-int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN])
+int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN],int owner)
 {
-    
+    struct MessageLog *messagelog = NULL;
+    struct MessageLog *new = NULL;
+    if (NULL == friendlist->next)
+        return 1;
+    //定位欲添加聊天记录的好友
+    while(NULL != friendlist)
+    {
+        if (0 == strcmp(friendlist->name,friendsname))
+            break;
+        friendlist = friendlist->next;
+    }
+    if (NULL == friendlist)
+        return 1;
+    //将指针移植最后一条聊天记录
+    messagelog = &friendlist->messagelog;
+    while(NULL != messagelog->next)
+        messagelog = messagelog->next;
+    //为新成员申请空间并赋值
+    new = (struct MessageLog *)malloc(sizeof(struct MessageLog));
+    strcpy(new->message,message);
+    new->owner = owner;
+    new->front = messagelog;
+    messagelog->next = new;
+    new->next = NULL;
+    return 0;
 }
+
+
+
 
 
 

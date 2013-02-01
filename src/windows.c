@@ -664,17 +664,11 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             keypad(stdscr,1);
             noecho();
             if (0 == strcmp(temp,"q"))
-                *sign = 1;
+                *sign = 0;
             else
             {
                 strcpy(message,temp);
                 *message_sign = 1;
-                move(y-4,17);
-                printw("                    ");
-                move(y-4,17);
-                printw("信息：%s",message);
-                move(y-2,17);
-                refresh();
             }
         }
     }
@@ -731,7 +725,7 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
             move(num + 9,33);
             printw("%+*s",x - 54," ");
             move(num + 9,33);
-            if (2 == msglog->sign) //若是自身发言，显示在右边
+            if (2 == msglog->owner) //若是自身发言，显示在右边
                 printw("%+*s",x - 54,msglog->message);
             else
                 printw("%-*s",x - 54,msglog->message);
@@ -764,7 +758,7 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
     int sumofmsg = 0;
     struct MessageLog *messagelog = NULL;
     if (NULL == friendslist->next)
-        return 0;
+        return 1;
     while(NULL != friendslist)      //寻找对应好友
     {
         if (0 == strcmp(friendslist->name,friendsname))
@@ -772,7 +766,7 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
         friendslist = friendslist->next;
     }
     if (NULL == friendslist)
-        return 0;
+        return 1;
     else
     {
         messagelog = &friendslist->messagelog;
@@ -783,29 +777,37 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
         }
         if (sumofmsg > y - 7)
         {
-            rows_cur = y - 2;
-            while(rows_cur >= 6)
+            rows_cur = y - 4;
+            while(rows_cur >= 3)
             {
-                move(rows_cur,20);
-                printw("%-*s",15,messagelog->message);
+                move(rows_cur,17);
+                if (2 == messagelog->owner) //若是自身发言，显示在右边
+                    printw("%-*s",x - 33,messagelog->message);
+                else
+                    printw("%+*s",x - 33,messagelog->message);
                 messagelog = messagelog->front;
                 rows_cur--;
             }
         }
         else
         {
-            rows_cur = 0;
-            while(rows_cur < y - 2)
+            messagelog = &friendslist->messagelog;
+            rows_cur = 3;
+            while(rows_cur < y - 4)
             {
                 if (NULL == messagelog)
                     break;
-                move(rows_cur,20);
-                printw("%-*s",15,messagelog->message);
+                move(rows_cur,17);
+                if (2 == messagelog->owner) //若是自身发言，显示在右边
+                    printw("%-*s",x - 33,messagelog->message);
+                else
+                    printw("%+*s",x - 33,messagelog->message);
                 messagelog = messagelog->next;
                 rows_cur++;
             }
         }
     }
+    return 0;
 }
 
 

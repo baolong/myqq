@@ -110,15 +110,12 @@ loop:
             if (message_sign == 1)
             {
                 num++;
-                Send(fd,MENU_SENDMESSAGE);
                 send(fd,MENU_SENDMESSAGE,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
-//                Send(fd,"2");
-                send(fd,"2",USERNAME_SIZE*sizeof(char),0);
+                send(fd,name,USERNAME_SIZE*sizeof(char),0);
                 usleep(SENDDELAYTIME);
-//                Send(fd,message_send);
                 send(fd,message_send,DATELEN*sizeof(char),0);
-                usleep(SENDDELAYTIME);
+                Cli_AddMessageLog(friendlist,name,message_send,1);
                 message_sign = 0;
             }
             usleep(SENDDELAYTIME*1000);
@@ -158,10 +155,11 @@ void *Display(void *argv1)
     leaveok(stdscr,1);
     while(1)
     {
-        clear();
+//        clear();
         Cli_Windows(&x,&y);   //客户端界面框架
         Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],*argv->sumoffriends,argv->name);   //显示好友列表 
         Cli_DisPlayMsg(x,y,argv->friendslist,argv->name);
+
         usleep(100000);
     } 
 }
@@ -208,6 +206,8 @@ void *RecvMsg(void *argv1)
         else if (DATETYPE_COMMUNICATE_I == datetype)  //接收聊天信息
         {
             Recv(*argv->fd,argv->message);
+            recv(*argv->fd,argv->sender,USERNAME_SIZE*sizeof(char),0);
+            Cli_AddMessageLog(argv->friendslist,argv->sender,argv->message,MSGOWN_FRIENDS_I);
         }
     }
 }

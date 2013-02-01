@@ -17,12 +17,19 @@
 #define MENU_ADDFRIEND             "8"    //添加新好友
 #define MENU_SENDMESSAGE           "9"    //发送消息
 
+//消息归属宏
+#define MSGOWN_MYSELF                 "1"   //消息归属为自身
+#define MSGOWN_FRIENDS                "2"   //消息归属为好友
+
 //数据类型宏 - 整形
 #define DATETYPE_FRIENDSLIST_I      1
 #define DATETYPE_COMMUNICATE_I      2
 #define DATETYPE_FRIENDSINFO_I      3
 #define MENU_ADDFRIEND_I            8
 #define MENU_SENDMESSAGE_I          9
+
+#define MSGOWN_MYSELF_I                1
+#define MSGOWN_FRIENDS_I               2
 
 struct arg_dis    //显示线程参数结构体
 {

@@ -175,24 +175,18 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
  * 返回值：成功 - 0
  *
  * *************************************/
-int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char name[USERNAME_SIZE])
+int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE])
 {
     unsigned int num = 0;
     int fd;
-/*    while(NULL != user->next)
-    {
-        if (0 == strcmp(user->name,name))
-            break;
-        else
-            user = user->next;
-    }*/
-    if ((fd = GetSocket(user,name)) < 0)
+    if ((fd = GetSocket(user,receiver)) < 0)
         return -1;
-    send(fd,"2",2,0);
+    send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
     usleep(SENDDELAYTIME);
     if ((num = send(fd,message,strlen(message),0)) > 0)
     {
-        InsertToMessagelog(friends,name,message,2);   //将信息写入接收者聊天记录
+        send(fd,selfname,USERNAME_SIZE*sizeof(char),0);
+        InsertToMessagelog(friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
         return 0;
     }
     return -1;

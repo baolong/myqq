@@ -190,15 +190,8 @@ loop:
             }
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {
-                move(32,30);
-                printw("                                ");
-                move(32,30);
-                printw("接收到：%s - %d - %s - %s Online:%d",cur->user.name,num,receiver,message,OnLine(argv->user,receiver,1));
-                refresh();
                 if (1 == OnLine(argv->user,receiver,1))    //判断接收人是否在线
-                {
-                    SendMessage(argv->user,&cur->user.friends,message,receiver);   //在线则直接发送给用户
-                }
+                    SendMessage(argv->user,&cur->user.friends,message,receiver,argv->name);   //在线则直接发送给用户
                 else
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
             }
@@ -241,8 +234,8 @@ void *Display(void *argv1)
     noecho();
     while(1)
     {
-        clear();
-        refresh();
+//        clear();
+//        refresh();
         argv2 = (struct arg_ser_dis *)argv1;
         {
 //            if (dis_temp == 0)
@@ -256,15 +249,6 @@ void *Display(void *argv1)
             argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
             Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
-            getyx(stdscr,y1,x1);
-            move(1,2);
-            printw("sign - num: 0 - 1 - 2 - 3");
-            move(2,2);
-            printw("                                                                                    ");
-            move(2,2);
-            printw(" %1d -        %1d - %1d - %1d - %1d - %1d - %d - %s - %s",*argv2->sign,argv2->num[0],argv2->num[1],argv2->num[2],argv2->num[3],argv2->num_max[0],argv2->num_max[1],argv2->name_cur,friend_cur);
-            refresh();
-            move(y1,x1);
             usleep(100000);
         }
     }
