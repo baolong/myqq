@@ -175,7 +175,7 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
  * 返回值：成功 - 0
  *
  * *************************************/
-int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE])
+int SendMessage(struct User_List *user,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE])
 {
     unsigned int num = 0;
     int fd;
@@ -186,7 +186,6 @@ int SendMessage(struct User_List *user,struct Friend *friends,char message[DATEL
     if ((num = send(fd,message,strlen(message),0)) > 0)
     {
         send(fd,selfname,USERNAME_SIZE*sizeof(char),0);
-        InsertToMessagelog(friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
         return 0;
     }
     return -1;
@@ -212,11 +211,15 @@ int SendOffLineMessage(struct User_List *user)
         offline = offline->next;
         while (NULL != user->user.offlinemessage.next)
         {
-            num++;
             offline = user->user.offlinemessage.next;
+            num++;
+//            offline = user->user.offlinemessage.next;
             del = offline;
-//        printf("发送离线消息：%s -%s\n",user->user.name,offline->message);
+            send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
+            usleep(SENDDELAYTIME);
             Send(fd,offline->message);
+            usleep(SENDDELAYTIME);
+            send(fd,offline->Sender,USERNAME_SIZE*sizeof(char),0);
             if (NULL != offline->next)
             {
                 offline->front->next = offline->next;

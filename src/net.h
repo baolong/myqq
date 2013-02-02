@@ -13,7 +13,7 @@
 #define PORT 5556      //端口
 #define CLIENTNUM 100   //最大用户连接数
 #define DATELEN 128*2     //单次数据长度
-#define IP "192.168.1.4"     //服务器IP地址
+#define IP "192.168.1.6"     //服务器IP地址
 
 int SerNetInit(void);
 int CliNetInit(void);
@@ -21,7 +21,7 @@ int Accept(int fp,struct sockaddr_in cli_addr);
 int Recv(int fp,char *date);
 int Send(int fp,char *date);
 int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNAME_SIZE],int fp,char buf[DATELEN],char receiver[USERNAME_SIZE]);
-int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE]);
+int SendMessage(struct User_List *user,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE]);
 int SendOffLineMessage(struct User_List *user);
 int JudgeFirstWord(char str[DATELEN]);
 

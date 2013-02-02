@@ -737,7 +737,8 @@ int GetTime(char time_str[21])
  * ************************************/
 int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[USERNAME_SIZE],char sender[USERNAME_SIZE])
 {
-    struct OffLineMessage *new;
+    struct OffLineMessage *new = NULL;
+    struct OffLineMessage *cur = NULL;
     char time_str[21];
     memset(time_str,0x0,sizeof(time_str));
     new = (struct OffLineMessage *)malloc(sizeof(struct OffLineMessage));
@@ -748,18 +749,16 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
         else
             user = user->next;
     }
+    cur = &user->user.offlinemessage;
+    while(NULL != cur->next)    //指向离线消息链表末尾
+        cur = cur->next;
     strcpy(new->message,buf);      //将信息存入新节点
     strcpy(new->Sender,sender);     //写入发送者用户名
     GetTime(time_str);          //获取当前时间
     strcpy(new->SendTime,time_str);     //写入当前时间
-    move(35,20);
-    printw("插入离线消息：%s - %s - %s",new->message,new->Sender,user->user.offlinemessage.message);
-    refresh();
-    user->user.offlinemessage.next = new;
+    cur->next = new;
     new->next = NULL;
-    new->front = &user->user.offlinemessage;
-//    printf("成功录入离线信息:%s\n",new->message);
-//    printf("成功录入离线信息:%s - %s\n",user->user.name,user->user.offlinemessage.next->message);
+    new->front = cur;;
     return 0;
 }
 
@@ -768,7 +767,6 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
  * 函数功能：获取用户在线状态
  * 参数：user - 用户链表
  *       online - 在线状态结构
- *                值为2则到达末尾
  *
  * ************************************/
 int GetOnline(struct User_List *user,int online[200])

@@ -180,7 +180,7 @@ loop:
         /******************
          * 发送用户离线消息
          * ***************/
-//        SendOffLineMessage(cur);    //发送离线消息
+        SendOffLineMessage(cur);    //发送离线消息
         usleep(SENDDELAYTIME);     //发送后延时
 
         /**************
@@ -222,9 +222,15 @@ loop:
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {
                 if (1 == OnLine(argv->user,receiver,1))    //判断接收人是否在线
-                    SendMessage(argv->user,&cur->user.friends,message,receiver,argv->name);   //在线则直接发送给用户
+                {
+                    SendMessage(argv->user,message,receiver,argv->name);   //在线则直接发送给用户
+                    InsertToMessagelog(&cur->user.friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
+                }
                 else
+                {
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
+                    InsertToMessagelog(&cur->user.friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
+                }
             }
             else  //出错,则自动断开链接
             {
@@ -258,7 +264,6 @@ void *Display(void *argv1)
     int sumoffriends = 0;
     int dis_temp = 0;
     x = 0;
-    sleep(1);
     clear();
     int x1,y1;
     leaveok(stdscr,1);

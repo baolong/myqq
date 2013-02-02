@@ -220,15 +220,18 @@ int ColorInit()
 int Cli_Windows(int *x,int *y)
 {
     int x1,y1;
+    char time[21];
     getyx(stdscr,y1,x1);
     attron(COLOR_PAIR(1));
     *x = *y = 0;
+    leaveok(stdscr,1);
     GetSize(x,y);
+    GetTime(time);
     box(stdscr,0,0);        //外边框
     move(1,*x/2-10);
     printw("多人聊天软件");
-    move(2,*x-23);
-    printw("时间:2012.12.05 23:00");
+    move(2,*x-25);
+    printw("时间:%-19s",time);
     move(3,1);
     hline(ACS_HLINE,*x-2);
     move(4,1);
@@ -248,6 +251,7 @@ int Cli_Windows(int *x,int *y)
     attroff(COLOR_PAIR(1));
     refresh();
     move(y1,x1);
+    leaveok(stdscr,0);
     return 0;
 }
 
@@ -259,15 +263,18 @@ int Cli_Windows(int *x,int *y)
 int Ser_windows(int *x,int *y)
 {
     int x1,y1;
+    char time[21];
     getyx(stdscr,y1,x1);   //获取光标当前位置
     attron(COLOR_PAIR(1));
     *x =*y = 0;
+    GetTime(time);
     GetSize(x,y);
+    leaveok(stdscr,1);
     box(stdscr,0,0);
     move(1,*x/2-14);
     printw("多人聊天软件服务器端");
-    move(2,*x-23);
-    printw("时间:2012.12.05 23:00");
+    move(2,*x-25);
+    printw("时间:%-19s",time);
     move(3,1);
     hline(ACS_HLINE,*x-2);
     move(4,1);
@@ -311,6 +318,7 @@ int Ser_windows(int *x,int *y)
     hline('-',15);
     move(*y-3,33);
     hline(ACS_HLINE,*x - 53);
+    leaveok(stdscr,0);
     attroff(COLOR_PAIR(1));
     refresh();
     move(y1,x1);   //恢复光标
@@ -477,15 +485,6 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
     {
         if (strcmp(list[temp],"") != 0)
         {
-/*            strcpy(name_temp,"");
-            len = strlen(list[temp]);
-            strcpy(name_temp,list[temp]);
-            while(len <= 13)
-            {
-                name_temp[len] = ' ';
-                len++;
-            }
-            name_temp[len] = '\0';*/
             getyx(stdscr,y1,x1);   //获取光标当前坐标
             if (temp == num)      //如果是被选中的用户，则反色显示
             {
@@ -732,7 +731,14 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
         friends = friends->next;
     }
     msglog = friends->messagelog.next;
-    int z = 10;
+    int z = 9;
+    while(z < y - 3)
+    {
+        move(z,33);
+        printw("%-*s",x - 54," ");
+        z++;
+    }
+    refresh();
     getyx(stdscr,y1,x1);   //获取光标当前位置
     while(num < msgdis_max)
     {
@@ -785,6 +791,13 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
         return 1;
     else
     {
+        num = 4;
+        while(num < y - 4)
+        {
+            move(num,17);
+            printw("%-*s",x - 33," ");
+            num++;
+        }
         messagelog = &friendslist->messagelog;
         while(NULL != messagelog->next)
         {
