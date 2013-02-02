@@ -537,13 +537,13 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
     int cur = num;
     int line = 6;
     int temp = 0;
-/*    while(line < y - 1)
+    while(line < y - 1)
     {
         move(line,17);
-        printw("     ");
+        printw("%15s"," ");
         line++;
     }
-    refresh();*/
+    refresh();
     if (num >= y - 7)
     {
         line = y - 2;
@@ -603,7 +603,7 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
  *       logout - 退出登录标识,为真有效
  * 
  * *********************************/
-int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign)
+int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign,int *addfriend_sign,char *addfriendsname)
 {
     int key = 0;
     int x,y;
@@ -613,8 +613,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
         GetSize(&x,&y);
         if (3 != *sign)   //若功能不为聊天输入模式，则检测按键
         {
-            key = 0;
-             
+            key = 0; 
             keypad(stdscr,1);
             key = getch();
             keypad(stdscr,0);
@@ -654,6 +653,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
         }
         else     //若功能选择为聊天呼入模式，则获取用户输入
         {
+            memset(temp,0x0,sizeof(temp));
             while(0 != *message_sign);   //等待发送缓冲区为空
             move(y-2,17);
             printw("            ");
@@ -663,8 +663,24 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             getstr(temp);
             keypad(stdscr,1);
             noecho();
+            //输入'q'(quit)或'fl'(friend list)
+            //则退出聊天模式，进入好友列表选择模式.
             if (0 == strcmp(temp,"q"))
                 *sign = 0;
+            else if (0 == strcmp(temp,"fl"))
+                *sign = 0;
+            else if (0 == strncmp(temp,"add ",4))
+            {
+                int num = 4;
+                memset(addfriendsname,0x0,USERNAME_SIZE*sizeof(char));
+                while(temp[num] != '\0')
+                {
+                    addfriendsname[num - 4] = temp[num];
+                    num++;
+                }
+                addfriendsname[num] = '\0';
+                *addfriend_sign = 1;
+            }
             else
             {
                 strcpy(message,temp);
@@ -791,8 +807,8 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
         }
         else
         {
-            messagelog = &friendslist->messagelog;
-            rows_cur = 3;
+            messagelog = friendslist->messagelog.next;
+            rows_cur = 4;
             while(rows_cur < y - 4)
             {
                 if (NULL == messagelog)

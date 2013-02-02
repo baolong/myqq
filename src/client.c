@@ -28,6 +28,8 @@ int main()
     char passwd[USERPASSWD_SIZE];   //用户密码缓冲区
     char sender[USERNAME_SIZE];
     char receiver[USERNAME_SIZE];
+    char addfriendsname[USERNAME_SIZE];
+    memset(addfriendsname,0x0,sizeof(addfriendsname));
 
     int message_sign = 0;  //发送缓冲区标识，0表示缓冲区为空
     int sign = 0;   //功能选择标识
@@ -37,6 +39,7 @@ int main()
     int num_temp = 0; 
     int sumoffriends = 0;
     int loginsign = 0;
+    int addfriend_sign = 0;
     //进行相关的初始化
     argv_key = &argv_key1;
     argv_dis = &argv_dis1;
@@ -48,6 +51,9 @@ int main()
     argv_key->logout = &logout;
     argv_key->message = message_send;
     argv_key->message_sign = &message_sign;
+    argv_key->addfriend_sign = &addfriend_sign;
+    argv_key->addfriendsname = addfriendsname;
+    argv_dis->addfriendsname = addfriendsname;
 
     argv_dis->name = name;
     argv_dis->name_loacl = name_loacl;
@@ -116,7 +122,18 @@ loop:
                 usleep(SENDDELAYTIME);
                 send(fd,message_send,DATELEN*sizeof(char),0);
                 Cli_AddMessageLog(friendlist,name,message_send,1);
+                memset(name,0x0,USERNAME_SIZE*sizeof(char));
+                memset(message_send,0x0,DATELEN*sizeof(char));
                 message_sign = 0;
+            }
+            if (1 == addfriend_sign)
+            {
+                send(fd,MENU_ADDFRIEND,3*sizeof(char),0);
+                usleep(SENDDELAYTIME);
+                send(fd,addfriendsname,USERNAME_SIZE*sizeof(char),0);
+                usleep(SENDDELAYTIME);
+                memset(addfriendsname,0x0,USERNAME_SIZE*sizeof(char));
+                addfriend_sign = 0;
             }
             usleep(SENDDELAYTIME*1000);
 
@@ -137,7 +154,7 @@ void *Keyboard(void *argv1)
 {
     struct arg_key *argv;
     argv = (struct arg_key *)argv1;  //初始化线程参数结构体
-    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign);
+    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,argv->addfriend_sign,argv->addfriendsname);
 }
 
 /*************************
@@ -152,14 +169,16 @@ void *Display(void *argv1)
     int x = 0,y = 0;    //屏幕最大尺寸变量
     int x1 = 0,y1 = 0;
     noecho();
-    leaveok(stdscr,1);
     while(1)
     {
 //        clear();
+        leaveok(stdscr,1);
+        getyx(stdscr,y1,x1);
         Cli_Windows(&x,&y);   //客户端界面框架
         Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],*argv->sumoffriends,argv->name);   //显示好友列表 
         Cli_DisPlayMsg(x,y,argv->friendslist,argv->name);
-
+        move(y1,x1);
+        leaveok(stdscr,0);
         usleep(100000);
     } 
 }

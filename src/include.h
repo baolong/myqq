@@ -38,7 +38,8 @@ struct arg_dis    //显示线程参数结构体
     int *sign;     //功能选项
     int *num;      //选中用户序列号
     struct Cli_Friendslist *friendslist;    //好友列表
-    int *sumoffriends;
+    int *sumoffriends;   //好友个数
+    char *addfriendsname;
 };
 
 struct arg_recv   //网络接收线程参数结构体
@@ -59,6 +60,8 @@ struct arg_key    //按键检测线程参数结构体
     int *logout;    //退出标识
     char *message;    //接收缓冲区
     int *message_sign;   //缓冲区空标识，0表示为空
+    int *addfriend_sign;
+    char *addfriendsname;
 };
 
 struct arg_ser_newconnect   //处理新链接线程参数结构体

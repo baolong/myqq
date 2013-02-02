@@ -96,12 +96,26 @@ void *NewUserConnect(void *argv1)
     char a[50][USERNAME_SIZE];
     argv = (struct arg_ser_newconnect *)argv1;
     
-    strcpy(a[0],"3");
-    AddUser(argv->user,"2","2",1,a);
+    strcpy(a[0],"peter");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"tom");
+    AddUser(argv->user,"andy","1",3,a);
     memset(a,0x0,sizeof(a));
-    strcpy(a[0],"2");
-    strcpy(a[1],"3");
-    AddUser(argv->user,"3","3",2,a);
+    strcpy(a[0],"andy");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"tom");
+    AddUser(argv->user,"peter","1",3,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"andy");
+    strcpy(a[1],"peter");
+    strcpy(a[2],"tom");
+    AddUser(argv->user,"ken","1",3,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"andy");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"peter");
+    AddUser(argv->user,"tom","1",3,a);
+
 
 loop:
     cur = argv->user;
@@ -175,18 +189,35 @@ loop:
         while(1)
         {
 //            pthread_mutex_lock(&mut);
+            num = 0;
             memset(receiver,0x0,sizeof(receiver));
             memset(message,0x0,sizeof(message));
             num = RecvMessage(argv->user,&cur->user.friends,argv->name,*argv->fd,message,receiver);
             if (MENU_ADDFRIEND_I == num)   //添加好友
             {
-                Recv(*argv->fd,receiver);   //接收欲添加的好友用户名
-                AddFriend(argv->user,argv->name,receiver);   //添加好友
-                GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表
+                recv(*argv->fd,receiver,USERNAME_SIZE*sizeof(char),0);
+                AddFriend(argv->user,argv->name,receiver);   //本用户添加对方好友
+                AddFriend(argv->user,receiver,argv->name);   //对方用户添加自己为好友
+
+                GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表 
                 Send(*argv->fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
                 usleep(SENDDELAYTIME);
-                send(*argv->fd,FriendList,sizeof(FriendList),0);  //发送好友列表
-                usleep(SENDDELAYTIME);    //发送后延时
+                memset(message,0x0,sizeof(message));
+                sprintf(message,"%d",cur->user.numoffriend);
+                Send(*argv->fd,message);
+                usleep(SENDDELAYTIME);
+                numoffriend = 1;
+                while(numoffriend <= cur->user.numoffriend)
+                {
+                    Send(*argv->fd,FriendList[numoffriend]);
+                    char online[2];
+                    online[0] = OnLine(argv->user,FriendList[numoffriend],1) + '0';
+                    online[1] = '\0';
+                    usleep(SENDDELAYTIME);    //发送后延时
+                    send(*argv->fd,online,sizeof(online),0);
+                    usleep(SENDDELAYTIME);
+                    numoffriend++;
+                }
             }
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {
@@ -258,8 +289,10 @@ void *Display(void *argv1)
 void *Keyboard(void *argv1)
 {
     struct arg_ser_key *argv;
+    int a = 0;
+    char s[2];
     argv = (struct arg_ser_key *)argv1;
-    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign);
+    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,&a,s);
     pthread_exit(NULL);
 }
 
