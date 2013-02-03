@@ -198,26 +198,14 @@ loop:
                 recv(*argv->fd,receiver,USERNAME_SIZE*sizeof(char),0);
                 AddFriend(argv->user,argv->name,receiver);   //本用户添加对方好友
                 AddFriend(argv->user,receiver,argv->name);   //对方用户添加自己为好友
-
-                GetFriendList(argv->user,argv->name,FriendList);  //获取用户好友列表 
-                Send(*argv->fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
-                usleep(SENDDELAYTIME);
-                memset(message,0x0,sizeof(message));
-                sprintf(message,"%d",cur->user.numoffriend);
-                Send(*argv->fd,message);
-                usleep(SENDDELAYTIME);
-                numoffriend = 1;
-                while(numoffriend <= cur->user.numoffriend)
-                {
-                    Send(*argv->fd,FriendList[numoffriend]);
-                    char online[2];
-                    online[0] = OnLine(argv->user,FriendList[numoffriend],1) + '0';
-                    online[1] = '\0';
-                    usleep(SENDDELAYTIME);    //发送后延时
-                    send(*argv->fd,online,sizeof(online),0);
-                    usleep(SENDDELAYTIME);
-                    numoffriend++;
-                }
+                SendFriendlist(argv->user,cur,argv->name,*argv->fd);  //发送好友列表
+            }
+            else if (MENU_DELFRIEND_I == num)    //删除好友
+            {
+                recv(*argv->fd,receiver,USERNAME_SIZE*sizeof(char),0);
+                DelFriend(argv->user,argv->name,receiver);
+                DelFriend(argv->user,receiver,argv->name);
+                SendFriendlist(argv->user,cur,argv->name,*argv->fd);
             }
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {

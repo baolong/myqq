@@ -151,6 +151,8 @@ int RecvMessage(struct User_List *user,struct Friend *friends,char sender[USERNA
         return -1;
     if (0 == strcmp(sign,MENU_ADDFRIEND))   //如果为1，则为添加好友，返回1
         return MENU_ADDFRIEND_I;
+    if (0 == strcmp(sign,MENU_DELFRIEND))    //删除好友
+        return MENU_DELFRIEND_I;
     if ((num = recv(fp,receiver,USERNAME_SIZE*sizeof(char),0)) < 0)     //接收信息接收人用户名
         return -1;
     if ((recv(fp,buf,DATELEN*sizeof(char),0)) < 0)     //接收信息内容
@@ -236,18 +238,35 @@ int SendOffLineMessage(struct User_List *user)
     return 0;
 }
 
-/**********************************
+/********************************
  *
- * 函数功能：检测接收到信息的
- *           第一个字节，以判断功能
- * 返回值：返回第一个字节对应整数值
+ * 函数功能：发送好友列表
  *
- * ******************************/
-int JudgeFirstWord(char str[DATELEN])
+ * *****************************/
+int SendFriendlist(struct User_List *user,struct User_List *cur,char *name,int fd)
 {
-    int num = 0;
-    num = str[0] - '0';
-    return num;
+    int numoffriend = 0;
+    char message[DATELEN];
+    char FriendList[FRIENDS_MAX][USERNAME_SIZE];
+    GetFriendList(user,name,FriendList);  //获取用户好友列表
+    Send(fd,DATETYPE_FRIENDSLIST);   //发送信息类型——好友列表
+    usleep(SENDDELAYTIME);
+    memset(message,0x0,sizeof(message));
+    sprintf(message,"%d",cur->user.numoffriend); 
+    Send(fd,message); 
+    usleep(SENDDELAYTIME); 
+    numoffriend = 1;
+    while(numoffriend <= cur->user.numoffriend)
+    {
+        Send(fd,FriendList[numoffriend]);
+        char online[2]; 
+        online[0] = OnLine(user,FriendList[numoffriend],1) + '0';
+        online[1] = '\0';
+        usleep(SENDDELAYTIME);    //发送后延时
+        send(fd,online,sizeof(online),0);
+        usleep(SENDDELAYTIME);
+        numoffriend++;
+    }
 }
 
 

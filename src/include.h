@@ -16,6 +16,7 @@
 
 #define MENU_ADDFRIEND             "8"    //添加新好友
 #define MENU_SENDMESSAGE           "9"    //发送消息
+#define MENU_DELFRIEND             "10"
 
 //消息归属宏
 #define MSGOWN_MYSELF                 "1"   //消息归属为自身
@@ -27,6 +28,7 @@
 #define DATETYPE_FRIENDSINFO_I      3
 #define MENU_ADDFRIEND_I            8
 #define MENU_SENDMESSAGE_I          9
+#define MENU_DELFRIEND_I            10
 
 #define MSGOWN_MYSELF_I                1
 #define MSGOWN_FRIENDS_I               2

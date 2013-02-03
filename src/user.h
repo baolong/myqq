@@ -77,6 +77,7 @@ int SaveList(struct User_List *user);
 int LoadList(struct User_List *user);
 int OnLine(struct User_List *user,char name[],int sign);
 int AddFriend(struct User_List *user,char name[],char nameoffriend[]);
+int DelFriend(struct User_List *user,char *name,char *nameoffriend);
 int CreateFriendList(struct Friend *friend,char name[][USERNAME_SIZE]);
 int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SIZE]);
 int Itoa(int num,char str[DATELEN]);

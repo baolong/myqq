@@ -668,9 +668,10 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                 *sign = 0;
             else if (0 == strcmp(temp,"fl"))
                 *sign = 0;
-            else if (0 == strncmp(temp,"add ",4))
+            else if (0 == strncmp(temp,"add ",4))   //添加好友
             {
                 int num = 4;
+                while(0 != *addfriend_sign);
                 memset(addfriendsname,0x0,USERNAME_SIZE*sizeof(char));
                 while(temp[num] != '\0')
                 {
@@ -679,6 +680,19 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                 }
                 addfriendsname[num] = '\0';
                 *addfriend_sign = 1;
+            }
+            else if (0 == strncmp(temp,"del ",3))   //删除好友
+            {
+                int num = 4;
+                while(0 != *addfriend_sign);
+                memset(addfriendsname,0x0,USERNAME_SIZE*sizeof(char));
+                while(temp[num] != '\0')
+                {
+                    addfriendsname[num - 4] = temp[num];
+                    num++;
+                }
+                addfriendsname[num] = '\0';
+                *addfriend_sign = 2;
             }
             else
             {

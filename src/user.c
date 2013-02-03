@@ -481,10 +481,7 @@ int OnLine(struct User_List *user,char name[],int sign)
 int AddFriend(struct User_List *user,char name[],char nameoffriend[])
 {
     if (SearchUser(user,nameoffriend))
-    {
-//        printf("没有该用户.\n");
         return 0;
-    }
     if (NULL != user->next)
     {
         while(NULL != user)
@@ -514,6 +511,45 @@ int AddFriend(struct User_List *user,char name[],char nameoffriend[])
         return 0;
     }
     return -1;
+}
+
+/*********************************************
+ *
+ * 函数功能：删除好友
+ *
+ * ******************************************/
+int DelFriend(struct User_List *user,char *name,char *nameoffriend)
+{
+    struct Friend *del_friend = NULL;
+    struct Friend *cur_friend = NULL;
+    if (SearchUser(user,nameoffriend))
+        return 1;
+    if (NULL != user->next)
+    {
+        while(NULL != user->next)
+        {
+            if (0 == strcmp(user->user.name,name))
+                break;
+            user = user->next;
+        }
+    }
+    if (0 != strcmp(user->user.name,name))
+        return 2;
+    cur_friend = &user->user.friends;
+    while(NULL != cur_friend)
+    {
+        if (0 == strcmp(cur_friend->name,nameoffriend))
+            break;
+        cur_friend = cur_friend->next;
+    }
+    if (0 != strcmp(cur_friend->name,nameoffriend))
+        return 3;
+    del_friend = cur_friend;
+    del_friend->front->next = del_friend->next;
+    del_friend->next->front = del_friend->front;
+    free(del_friend);
+    user->user.numoffriend--;
+    return 0;
 }
 
 /**********************************************
@@ -790,8 +826,7 @@ int GetOnline(struct User_List *user,int online[200])
 
 /*********************************
  *
- * 函数功能：客户端好友列表数据库
- *           添加好友成员
+ * 函数功能：客户端添加好友
  * 
  * *******************************/
 int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE])
@@ -805,6 +840,37 @@ int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNA
     friendlist->next = newfriend;
     newfriend->front = friendlist;
     newfriend->next = NULL;
+    return 0;
+}
+
+/*********************************
+ *
+ * 函数功能：客户端删除好友
+ *
+ * *****************************/
+int Cli_DelFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE])
+{
+    int sign = 0;
+    struct Cli_Friendslist *del = NULL;
+    if (NULL != friendlist->next)
+    {
+        while(NULL != friendlist->next)
+        {
+            if (0 == strcmp(friendlist->name,friendsname))
+            {
+                sign = 1;
+                break;
+            }
+            friendlist = friendlist->next;
+        }
+        if (1 == sign)
+            del = friendlist;
+        else
+            return 0;
+        del->next->front = del->front;
+        del->front->next = del->next;
+        free(del);
+    }
     return 0;
 }
 

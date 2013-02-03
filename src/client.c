@@ -122,8 +122,8 @@ loop:
                 usleep(SENDDELAYTIME);
                 send(fd,message_send,DATELEN*sizeof(char),0);
                 Cli_AddMessageLog(friendlist,name,message_send,1);
-                memset(name,0x0,USERNAME_SIZE*sizeof(char));
-                memset(message_send,0x0,DATELEN*sizeof(char));
+//                memset(name,0x0,USERNAME_SIZE*sizeof(char));
+//                memset(message_send,0x0,DATELEN*sizeof(char));
                 message_sign = 0;
             }
             if (1 == addfriend_sign)
@@ -132,7 +132,14 @@ loop:
                 usleep(SENDDELAYTIME);
                 send(fd,addfriendsname,USERNAME_SIZE*sizeof(char),0);
                 usleep(SENDDELAYTIME);
-                memset(addfriendsname,0x0,USERNAME_SIZE*sizeof(char));
+                addfriend_sign = 0;
+            }
+            else if (2 == addfriend_sign)
+            {
+                send(fd,MENU_DELFRIEND,3*sizeof(char),0);
+                usleep(SENDDELAYTIME);
+                send(fd,addfriendsname,USERNAME_SIZE*sizeof(char),0);
+                usleep(SENDDELAYTIME);
                 addfriend_sign = 0;
             }
             usleep(SENDDELAYTIME*1000);

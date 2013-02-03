@@ -16,6 +16,7 @@ CliNetInit	src/net.c	/^int CliNetInit()$/;"	f
 Cli_AddFriendlist	src/user.c	/^int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE])$/;"	f
 Cli_AddMessageLog	src/user.c	/^int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN],int owner)$/;"	f
 Cli_Apply	src/windows.c	/^int Cli_Apply(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])$/;"	f
+Cli_DelFriendlist	src/user.c	/^int Cli_DelFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE])$/;"	f
 Cli_DisPlayMsg	src/windows.c	/^int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsname[USERNAME_SIZE])$/;"	f
 Cli_DisplayFriendList	src/windows.c	/^int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int num,int sum,char name[USERNAME_SIZE])$/;"	f
 Cli_DisplayUserDate	src/windows.c	/^int Cli_DisplayUserDate(int x,int y,struct User_List *user,char name[USERNAME_SIZE])$/;"	f
@@ -29,11 +30,11 @@ CreateFriendList	src/user.c	/^int CreateFriendList(struct Friend *friend,char na
 DATELEN	src/net.h	15;"	d
 DATELEN	src/user.h	4;"	d
 DATETYPE_COMMUNICATE	src/include.h	8;"	d
-DATETYPE_COMMUNICATE_I	src/include.h	26;"	d
+DATETYPE_COMMUNICATE_I	src/include.h	27;"	d
 DATETYPE_FRIENDSINFO	src/include.h	9;"	d
-DATETYPE_FRIENDSINFO_I	src/include.h	27;"	d
+DATETYPE_FRIENDSINFO_I	src/include.h	28;"	d
 DATETYPE_FRIENDSLIST	src/include.h	7;"	d
-DATETYPE_FRIENDSLIST_I	src/include.h	25;"	d
+DATETYPE_FRIENDSLIST_I	src/include.h	26;"	d
 DATETYPE_OFFLINEMESSAGE	src/include.h	10;"	d
 Del	src/test_user.c	/^int Del(struct User_List *user)$/;"	f
 Del	test/test_user.c	/^int Del(struct User_List *user)$/;"	f
@@ -64,13 +65,15 @@ ListEmpty	src/user.c	/^int ListEmpty(struct User_List *user)$/;"	f
 ListLength	src/user.c	/^int ListLength(struct User_List *user)$/;"	f
 LoadList	src/user.c	/^int LoadList(struct User_List *user)$/;"	f
 MENU_ADDFRIEND	src/include.h	17;"	d
-MENU_ADDFRIEND_I	src/include.h	28;"	d
+MENU_ADDFRIEND_I	src/include.h	29;"	d
+MENU_DELFRIEND	src/include.h	19;"	d
+MENU_DELFRIEND_I	src/include.h	31;"	d
 MENU_SENDMESSAGE	src/include.h	18;"	d
-MENU_SENDMESSAGE_I	src/include.h	29;"	d
-MSGOWN_FRIENDS	src/include.h	22;"	d
-MSGOWN_FRIENDS_I	src/include.h	32;"	d
-MSGOWN_MYSELF	src/include.h	21;"	d
-MSGOWN_MYSELF_I	src/include.h	31;"	d
+MENU_SENDMESSAGE_I	src/include.h	30;"	d
+MSGOWN_FRIENDS	src/include.h	23;"	d
+MSGOWN_FRIENDS_I	src/include.h	34;"	d
+MSGOWN_MYSELF	src/include.h	22;"	d
+MSGOWN_MYSELF_I	src/include.h	33;"	d
 MYQQ_H	src/include.h	2;"	d
 MessageLog	src/user.h	/^struct MessageLog$/;"	s
 NET_H	src/net.h	2;"	d
@@ -88,7 +91,7 @@ SRC	Makefile	/^SRC = .\/src\/$/;"	m
 SaveList	src/user.c	/^int SaveList(struct User_List *user)$/;"	f
 SearchUser	src/user.c	/^int SearchUser(struct User_List *user,char name[])$/;"	f
 Send	src/net.c	/^int Send(int fp,char *date)$/;"	f
-SendMessage	src/net.c	/^int SendMessage(struct User_List *user,struct Friend *friends,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE])$/;"	f
+SendMessage	src/net.c	/^int SendMessage(struct User_List *user,char message[DATELEN],char receiver[USERNAME_SIZE],char selfname[USERNAME_SIZE])$/;"	f
 SendOffLineMessage	src/net.c	/^int SendOffLineMessage(struct User_List *user)$/;"	f
 SendTime	src/user.h	/^    char SendTime[21];               \/\/发送时间$/;"	m	struct:OffLineMessage
 Sender	src/user.h	/^    char Sender[USERNAME_SIZE];       \/\/发送者$/;"	m	struct:OffLineMessage
