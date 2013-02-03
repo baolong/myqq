@@ -113,7 +113,7 @@ loop:
         pthread_create(&pth_recv,NULL,RecvMsg,argv_recv);  //创建接收信息线程
         while(1)
         {
-            if (message_sign == 1)
+            if (message_sign == 1)     //消息缓冲区非空，则发送消息
             {
                 num++;
                 send(fd,MENU_SENDMESSAGE,3*sizeof(char),0);
@@ -126,7 +126,7 @@ loop:
 //                memset(message_send,0x0,DATELEN*sizeof(char));
                 message_sign = 0;
             }
-            if (1 == addfriend_sign)
+            if (1 == addfriend_sign)     //添加好友
             {
                 send(fd,MENU_ADDFRIEND,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
@@ -134,7 +134,7 @@ loop:
                 usleep(SENDDELAYTIME);
                 addfriend_sign = 0;
             }
-            else if (2 == addfriend_sign)
+            else if (2 == addfriend_sign)     //删除好友
             {
                 send(fd,MENU_DELFRIEND,3*sizeof(char),0);
                 usleep(SENDDELAYTIME);
@@ -180,11 +180,11 @@ void *Display(void *argv1)
     {
 //        clear();
         leaveok(stdscr,1);
-        getyx(stdscr,y1,x1);
+//        getyx(stdscr,y1,x1);
         Cli_Windows(&x,&y);   //客户端界面框架
         Cli_DisplayFriendList(x,y,argv->friendslist,argv->num[0],*argv->sumoffriends,argv->name);   //显示好友列表 
         Cli_DisPlayMsg(x,y,argv->friendslist,argv->name);
-        move(y1,x1);
+//        move(y1,x1);
         leaveok(stdscr,0);
         usleep(100000);
     } 
@@ -215,6 +215,7 @@ void *RecvMsg(void *argv1)
             Recv(*argv->fd,argv->message);  //接收好友列表长度
             *argv->sumoffriends = atoi(argv->message);
             numoffriend = 0;
+            Cli_ClearFriendlist(argv->friendslist);
             while(numoffriend < *argv->sumoffriends)
             {
                 Recv(*argv->fd,name);  //接收好友列表

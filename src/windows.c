@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <locale.h>
+#include "include.h"
 
 /******************************
  *
@@ -219,7 +220,7 @@ int ColorInit()
  * *****************************/
 int Cli_Windows(int *x,int *y)
 {
-    int x1,y1;
+    int x1 = 0,y1 = 0;
     char time[21];
     getyx(stdscr,y1,x1);
     attron(COLOR_PAIR(1));
@@ -339,8 +340,19 @@ int Ser_windows(int *x,int *y)
  * ***************************/
 int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int num,int sum,char name[USERNAME_SIZE])
 {
-    int cur = 0;
+    int cur = 6;
     int temp = 0;
+    int x1 = 0,y1 = 0;
+    getyx(stdscr,y1,x1);
+    leaveok(stdscr,1);
+    while(cur < y - 1)
+    {
+        move(cur,1);
+        printw("%-*s",15," ");
+        cur++;
+    }
+    move(y1,x1);
+//    refresh();
     if (NULL == friendslist->next)
         return 0;
     if (num < y - 7)
@@ -425,6 +437,8 @@ int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int nu
                
         }
     }
+    refresh();
+    move(y1,x1);
 }
 
 /*************************************
@@ -614,8 +628,10 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
         {
             key = 0; 
             keypad(stdscr,1);
+            leaveok(stdscr,1);
             key = getch();
             keypad(stdscr,0);
+            leaveok(stdscr,0);
             switch(key)
             {
                 case KEY_UP:
@@ -644,7 +660,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                 case '4':
                     *sign = 2;
                     break;
-                case 27:
+                case '5':
                     *logout = 1;
             //     return 0;
             }
@@ -659,8 +675,10 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             move(y - 2,17);
             echo();
             keypad(stdscr,0);
+            leaveok(stdscr,0);
             getstr(temp);
             keypad(stdscr,1);
+            leaveok(stdscr,1);
             noecho();
             //输入'q'(quit)或'fl'(friend list)
             //则退出聊天模式，进入好友列表选择模式.
@@ -668,7 +686,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                 *sign = 0;
             else if (0 == strcmp(temp,"fl"))
                 *sign = 0;
-            else if (0 == strncmp(temp,"add ",4))   //添加好友
+            else if (0 == strncmp(temp,CM_ADDFRIEND,4))   //添加好友
             {
                 int num = 4;
                 while(0 != *addfriend_sign);
@@ -681,7 +699,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                 addfriendsname[num] = '\0';
                 *addfriend_sign = 1;
             }
-            else if (0 == strncmp(temp,"del ",3))   //删除好友
+            else if (0 == strncmp(temp,CM_DELFRIEND,3))   //删除好友KE
             {
                 int num = 4;
                 while(0 != *addfriend_sign);
@@ -762,9 +780,9 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
             printw("%+*s",x - 54," ");
             move(num + 9,33);
             if (2 == msglog->owner) //若是自身发言，显示在右边
-                printw("%+*s",x - 54,msglog->message);
+                printw("%d - %+*s",temp->user.sumofofflinemsg,x - 54,msglog->message);
             else
-                printw("%-*s",x - 54,msglog->message);
+                printw("%d - %-*s",temp->user.sumofofflinemsg,x - 54,msglog->message);
 //            if (NULL == msglog->next)
 //                break;
             msglog = msglog->next;
@@ -788,6 +806,7 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
  * ************************************/
 int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsname[USERNAME_SIZE])
 {
+    int x1 = 0,y1 = 0;
     int msgdis_max = 20;
     int num = 0;
     int rows_cur = 0;
@@ -805,6 +824,8 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
         return 1;
     else
     {
+        getyx(stdscr,y1,x1);
+        leaveok(stdscr,1);
         num = 4;
         while(num < y - 4)
         {
@@ -849,6 +870,9 @@ int Cli_DisPlayMsg(int x,int y,struct Cli_Friendslist *friendslist,char friendsn
                 rows_cur++;
             }
         }
+        refresh();
+        move(y1,x1);
+        leaveok(stdscr,0);
     }
     return 0;
 }

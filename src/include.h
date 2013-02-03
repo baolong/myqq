@@ -19,8 +19,8 @@
 #define MENU_DELFRIEND             "10"
 
 //消息归属宏
-#define MSGOWN_MYSELF                 "1"   //消息归属为自身
-#define MSGOWN_FRIENDS                "2"   //消息归属为好友
+#define MSGOWN_MYSELF               "1"   //消息归属为自身
+#define MSGOWN_FRIENDS              "2"   //消息归属为好友
 
 //数据类型宏 - 整形
 #define DATETYPE_FRIENDSLIST_I      1
@@ -30,8 +30,16 @@
 #define MENU_SENDMESSAGE_I          9
 #define MENU_DELFRIEND_I            10
 
-#define MSGOWN_MYSELF_I                1
-#define MSGOWN_FRIENDS_I               2
+#define MSGOWN_MYSELF_I             1
+#define MSGOWN_FRIENDS_I            2
+
+//客户端相关命令
+#define CM_ADDFRIEND                 "add "
+#define CM_DELFRIEND                 "del "
+
+#define CLOSE                       1
+#define RUNNING                     0
+
 
 struct arg_dis    //显示线程参数结构体
 {
@@ -94,6 +102,7 @@ struct arg_ser_dis    //显示进程参数结构
     int *sign;
     int *num_max;           //各列表对象最大数
     char *name_cur;           //返回被选中用户名
+    int *logout;
 };
 
 

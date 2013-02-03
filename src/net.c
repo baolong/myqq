@@ -230,6 +230,7 @@ int SendOffLineMessage(struct User_List *user)
             else
                 offline->front->next = NULL;
             free(del);
+            user->user.sumofofflinemsg--;
         }
         return num;
 

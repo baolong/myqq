@@ -51,9 +51,11 @@ int main()
     argv_dis->sign = &sign_menu;
     argv_dis->num_max = num_max;
     argv_dis->name_cur = name_cur;
+    argv_dis->logout = &logout;
 
     WindowInit();
     InitList(user);
+//    Ser_LoadList(user);
     pthread_mutex_init(&mut,NULL);
 //    user->front = NULL;
 //    user->next = NULL;
@@ -115,6 +117,7 @@ void *NewUserConnect(void *argv1)
     strcpy(a[1],"ken");
     strcpy(a[2],"peter");
     AddUser(argv->user,"tom","1",3,a);
+    
 
 
 loop:
@@ -244,6 +247,7 @@ void *Display(void *argv1)
 {
     struct arg_ser_dis *argv2;
     struct User_List *user;
+    argv2 = (struct arg_ser_dis *)argv1;
     int x = 0,y = 0;
     char userlist[200][USERNAME_SIZE];
     char friendlist[200][USERNAME_SIZE];
@@ -258,9 +262,14 @@ void *Display(void *argv1)
     noecho();
     while(1)
     {
+        if (1 == *argv2->logout)     //关闭并保存数据
+        {
+            Ser_SaveList(argv2->user);
+            endwin();
+            exit(0);
+        }
 //        clear();
 //        refresh();
-        argv2 = (struct arg_ser_dis *)argv1;
         {
 //            if (dis_temp == 0)
 //                clear();   //清屏

@@ -28,7 +28,8 @@ struct Cli_Friendslist
 struct Friend       //用户好友列表结构体
 {
     char name[USERNAME_SIZE];          //好友用户名
-    struct MessageLog messagelog;        //聊天记录
+    unsigned long sumofmsglog;         //聊天记录条数
+    struct MessageLog messagelog;        //聊天记录内容
     struct Friend *front;
     struct Friend *next;
 };
@@ -49,6 +50,7 @@ struct User_Type    //用户信息结构体
     int online;                           //在线状态
     unsigned int numoffriend;              //好友个数
     struct Friend friends;             //好友列表结构
+    unsigned int sumofofflinemsg;         //离线消息数
     struct OffLineMessage offlinemessage;    //离线消息
     int socket;                    //用户对应套接字
 };
@@ -73,8 +75,8 @@ int UserPasswdChange(struct User_List *user,char *name,char *passwd,char *oldpas
 int SearchUser(struct User_List *user,char name[]);
 int UserDel(struct User_List *user,char name[],char password[]);
 int DisList(struct User_List *user);
-int SaveList(struct User_List *user);
-int LoadList(struct User_List *user);
+int Ser_SaveList(struct User_List *user);
+int Ser_LoadList(struct User_List *user);
 int OnLine(struct User_List *user,char name[],int sign);
 int AddFriend(struct User_List *user,char name[],char nameoffriend[]);
 int DelFriend(struct User_List *user,char *name,char *nameoffriend);
@@ -91,5 +93,7 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
 int GetUserList(struct User_List *user,char list[][USERNAME_SIZE]);
 int GetOnline(struct User_List *user,int online[200]);
 int Cli_AddFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE]);
+int Cli_DelFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE]);
+int Cli_ClearFriendlist(struct Cli_Friendslist *friendlist);
 int Cli_AddMessageLog(struct Cli_Friendslist *friendlist,char friendsname[USERNAME_SIZE],char message[DATELEN],int owner);
 #endif

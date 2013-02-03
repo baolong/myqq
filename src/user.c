@@ -337,44 +337,39 @@ int DisList(struct User_List *user)
  * 返回值：成功返回0，没有数据返回1
  *
  * ****************************/
-int SaveList(struct User_List *user)
+int Ser_SaveList(struct User_List *user)
 {
     FILE *fp;
     if (NULL == (fp = fopen("date","w+")))             //打开date文件
-    {
-        perror("fp");
         return 3;
-    }
-    int sum = 0;      //用户个数 整形
+    int sumofuser = 0;      //用户个数 整形
     char sum_[3];     //用户个数 字符串
-    char num_[5];     //用户好友个数 
-    struct Friend *temp;    //用户好友列表指针
-    sum = ListLength(user);    //获取用户总数
-//    sum_[1] = sum%10+48;      
-//    sum_[0] = sum/10%10+48;
-//    sum_[2] = '\0';
-    sprintf(sum_,"%d",sum);
+    sumofuser = ListLength(user);    //获取用户总数
+    sprintf(sum_,"%d",sumofuser);
     fwrite(sum_,sizeof(sum_),1,fp);
-    if (NULL == user->next)
-        return 1;
-    else
+    if (0 < sumofuser)
     {
         user = user->next;
-        while(user != NULL)
+        while(NULL != user)
         {
-            temp = &user->user.friends;
-            sprintf(num_,"%d",user->user.numoffriend);
-            fwrite(user->user.name,sizeof(user->user.name),1,fp);
-            fwrite(user->user.password,sizeof(user->user.password),1,fp);
-            fwrite(num_,sizeof(num_),1,fp);
-            if (NULL != temp->next)
+            struct OffLineMessage *offlinemsg = &user->user.offlinemessage;
+            struct Friend *friends = user->user.friends.next;;
+            fwrite(user,sizeof(struct User_List),1,fp);
+            while(NULL != friends->next)
             {
-                temp = temp->next;
-                while(NULL != temp)
+                struct MessageLog *msglog = friends->messagelog.next;
+                fwrite(friends,sizeof(struct Friend),1,fp);
+                while(NULL != msglog)
                 {
-                    fwrite(temp->name,USERNAME_SIZE*sizeof(char),1,fp);
-                    temp = temp->next;
+                    fwrite(msglog,sizeof(struct MessageLog),1,fp);
+                    msglog = msglog->next;
                 }
+                friends = friends->next;
+            }
+            while(NULL != offlinemsg)
+            {
+                fwrite(offlinemsg,sizeof(struct OffLineMessage),1,fp);
+                offlinemsg = offlinemsg->next;
             }
             user = user->next;
         }
@@ -383,43 +378,26 @@ int SaveList(struct User_List *user)
     return 1;
 }
 
-int LoadList(struct User_List *user)
+int Ser_LoadList(struct User_List *user)
 {
     FILE *fp;
-//    printf("LoadList:%d\n",user);
-    char name[USERNAME_SIZE] = "",passwd[USERPASSWD_SIZE] = "";
     if ((fp = fopen("date","r+")) < 0)
-    {
-//        perror("fp");
         return 1;
-    }
     int sumofuser = 0;
     char sumofuser_[3];
-    int sumoffriends = 0,numoffriends = 0;
-    char sumoffriends_[5];
     memset(&sumofuser_, 0x0, sizeof(sumofuser_));
-    char nametemp[10][USERNAME_SIZE];
     fread(sumofuser_, sizeof(sumofuser_), 1, fp);
     sumofuser = atoi(sumofuser_);
 //    printf("sumofusers:%d\n",sumofuser);
 //    user = user->next;
     while(sumofuser > 0)
     {
-        memset(&sumoffriends_, 0x0, sizeof(sumoffriends_));
-        memset(&nametemp,0x0,sizeof(nametemp));
-        fread(name, USERNAME_SIZE*sizeof(char), 1, fp);          //读取用户名
-        fread(passwd, USERPASSWD_SIZE*sizeof(char), 1, fp);        //读取用户密码
-        fread(sumoffriends_, sizeof(sumoffriends_), 1, fp);    //读取用户好友个数字符串
-//        printf("name:%s - %s sumoffriends_:%s\n",name,passwd,sumoffriends_);
-        sumoffriends = atoi(sumoffriends_);       //将用户好友个数转换成整型
-        numoffriends = 0;
-        while(numoffriends < sumoffriends)          //循环读取用户好友用户名
-        {
-            fread(nametemp[numoffriends],USERNAME_SIZE*sizeof(char),1,fp);
-//            printf("%dfriend's name:%s\n",numoffriends,nametemp[numoffriends]);
-            numoffriends++;
-        }
-        AddUser(user,name,passwd,sumoffriends,nametemp);
+        struct User_List *new = NULL;
+        new = (struct User_List *)malloc(sizeof(struct User_List));
+        fread(new,sizeof(struct User_List),1,fp);
+        user->next = new;
+        new->front = user;
+        user = user->next;
         sumofuser--;
     }
     fclose(fp);
@@ -546,7 +524,8 @@ int DelFriend(struct User_List *user,char *name,char *nameoffriend)
         return 3;
     del_friend = cur_friend;
     del_friend->front->next = del_friend->next;
-    del_friend->next->front = del_friend->front;
+    if (NULL != del_friend->next)
+        del_friend->next->front = del_friend->front;
     free(del_friend);
     user->user.numoffriend--;
     return 0;
@@ -662,6 +641,7 @@ int InsertToMessagelog(struct Friend *friends,char name[USERNAME_SIZE],char mess
                 newmessage->front = temp;
                 temp->next = newmessage;
                 newmessage->next = NULL;
+                friends->sumofmsglog++;
                 return 1;
             }
             else
@@ -794,7 +774,8 @@ int InsertOffLineMessage(struct User_List *user,char buf[DATELEN],char receiver[
     strcpy(new->SendTime,time_str);     //写入当前时间
     cur->next = new;
     new->next = NULL;
-    new->front = cur;;
+    new->front = cur;
+    user->user.sumofofflinemsg++;
     return 0;
 }
 
@@ -870,6 +851,30 @@ int Cli_DelFriendlist(struct Cli_Friendslist *friendlist,char friendsname[USERNA
         del->next->front = del->front;
         del->front->next = del->next;
         free(del);
+    }
+    return 0;
+}
+
+/**********************************
+ *
+ * 函数功能：清空客户端好友列表
+ * 
+ * ******************************/
+int Cli_ClearFriendlist(struct Cli_Friendslist *friendlist)
+{
+    struct Cli_Friendslist *del = NULL;
+    if (NULL != friendlist->next)
+    {
+        friendlist = friendlist->next;
+        while(NULL != friendlist->next)
+            friendlist = friendlist->next;
+        while(NULL != friendlist->front)
+        {
+            del = friendlist;
+            del->front->next = NULL;
+            friendlist = friendlist->front;
+            free(del);
+        }
     }
     return 0;
 }
