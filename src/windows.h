@@ -7,6 +7,7 @@
 
 int Cli_Welcome();
 int WindowInit();
+int MessageBox(int x,int y,char *message,int sign);
 int Cli_Login();
 int Cli_Apply(int x,int y,char name[USERNAME_SIZE],char passwd[USERNAME_SIZE]);
 int ColorInit();

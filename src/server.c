@@ -285,6 +285,7 @@ void *Display(void *argv1)
             argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
             Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
+            MessageBox(x,y,"asd",1);
             usleep(100000);
         }
     }

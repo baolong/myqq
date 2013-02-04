@@ -19,6 +19,24 @@ int WindowInit()
     ColorInit();
 }
 
+int MessageBox(int x,int y,char *message,int sign)
+{
+    attron(COLOR_PAIR(6));
+    move(y/2 - 3,x/2 - 20);
+    hline(ACS_HLINE,40);
+    move(y/2 - 2,x/2 - 5);
+    printw("提      醒");
+    move(y/2 - 2,x/2 - 20);
+    vline(ACS_VLINE,5);
+    move(y/2 + 3,x/2 - 20);
+    hline(ACS_HLINE,40);
+    move(y/2 - 2,x/2 + 19);
+    vline(ACS_VLINE,5);
+    refresh();
+    attroff(COLOR_PAIR(6));
+
+}
+
 /****************************
  *
  * 函数功能：登陆界面
@@ -206,8 +224,8 @@ int ColorInit()
     init_pair(2,COLOR_BLACK,COLOR_GREEN);
     init_pair(3,COLOR_RED,COLOR_GREEN);
     init_pair(4,COLOR_GREEN,COLOR_BLACK);
-    init_pair(5,COLOR_WHITE,COLOR_BLACK);
-    init_pair(6,COLOR_GREEN,COLOR_BLACK);
+    init_pair(5,COLOR_GREEN,COLOR_BLACK);
+    init_pair(6,COLOR_RED,COLOR_BLACK);
     init_pair(7,COLOR_GREEN,COLOR_BLACK);
 }
 /********************************
@@ -780,9 +798,9 @@ int Ser_DisPlayMsg(int x,int y,struct User_List *user,char username[USERNAME_SIZ
             printw("%+*s",x - 54," ");
             move(num + 9,33);
             if (2 == msglog->owner) //若是自身发言，显示在右边
-                printw("%d - %+*s",temp->user.sumofofflinemsg,x - 54,msglog->message);
+                printw("%+*s",x - 54,msglog->message);
             else
-                printw("%d - %-*s",temp->user.sumofofflinemsg,x - 54,msglog->message);
+                printw("%-*s",x - 54,msglog->message);
 //            if (NULL == msglog->next)
 //                break;
             msglog = msglog->next;
