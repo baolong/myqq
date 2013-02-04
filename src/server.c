@@ -53,9 +53,33 @@ int main()
     argv_dis->name_cur = name_cur;
     argv_dis->logout = &logout;
 
+    char a[50][USERNAME_SIZE];
     WindowInit();
     InitList(user);
-//    Ser_LoadList(user);
+    if (0 == access("date",0))
+        Ser_LoadList(user);
+    else
+    {
+    strcpy(a[0],"peter");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"tom");
+    AddUser(user,"andy","1",3,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"andy");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"tom");
+    AddUser(user,"peter","1",3,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"andy");
+    strcpy(a[1],"peter");
+    strcpy(a[2],"tom");
+    AddUser(user,"ken","1",3,a);
+    memset(a,0x0,sizeof(a));
+    strcpy(a[0],"andy");
+    strcpy(a[1],"ken");
+    strcpy(a[2],"peter");
+    AddUser(user,"tom","1",3,a);
+    }
     pthread_mutex_init(&mut,NULL);
 //    user->front = NULL;
 //    user->next = NULL;
@@ -95,29 +119,8 @@ void *NewUserConnect(void *argv1)
     struct arg_ser_newconnect *argv;
     char FriendList[FRIENDS_MAX][USERNAME_SIZE];
     char message[DATELEN];
-    char a[50][USERNAME_SIZE];
     argv = (struct arg_ser_newconnect *)argv1;
-    
-    strcpy(a[0],"peter");
-    strcpy(a[1],"ken");
-    strcpy(a[2],"tom");
-    AddUser(argv->user,"andy","1",3,a);
-    memset(a,0x0,sizeof(a));
-    strcpy(a[0],"andy");
-    strcpy(a[1],"ken");
-    strcpy(a[2],"tom");
-    AddUser(argv->user,"peter","1",3,a);
-    memset(a,0x0,sizeof(a));
-    strcpy(a[0],"andy");
-    strcpy(a[1],"peter");
-    strcpy(a[2],"tom");
-    AddUser(argv->user,"ken","1",3,a);
-    memset(a,0x0,sizeof(a));
-    strcpy(a[0],"andy");
-    strcpy(a[1],"ken");
-    strcpy(a[2],"peter");
-    AddUser(argv->user,"tom","1",3,a);
-    
+   
 
 
 loop:

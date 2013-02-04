@@ -20,6 +20,8 @@ int InitList(struct User_List *user)
     user = (struct User_List *)malloc(sizeof(struct User_List));
     user->front = NULL;
     user->next = NULL;
+    user->user.friends.front = NULL;
+    user->user.friends.next = NULL;
     user->user.offlinemessage.next = NULL;
     user->user.offlinemessage.front = NULL;
     user->user.friends.messagelog.front = NULL;
@@ -352,10 +354,10 @@ int Ser_SaveList(struct User_List *user)
         user = user->next;
         while(NULL != user)
         {
-            struct OffLineMessage *offlinemsg = &user->user.offlinemessage;
-            struct Friend *friends = user->user.friends.next;;
+            struct OffLineMessage *offlinemsg = user->user.offlinemessage.next;
+            struct Friend *friends = user->user.friends.next;
             fwrite(user,sizeof(struct User_List),1,fp);
-            while(NULL != friends->next)
+            while(NULL != friends)
             {
                 struct MessageLog *msglog = friends->messagelog.next;
                 fwrite(friends,sizeof(struct Friend),1,fp);
@@ -388,15 +390,53 @@ int Ser_LoadList(struct User_List *user)
     memset(&sumofuser_, 0x0, sizeof(sumofuser_));
     fread(sumofuser_, sizeof(sumofuser_), 1, fp);
     sumofuser = atoi(sumofuser_);
-//    printf("sumofusers:%d\n",sumofuser);
-//    user = user->next;
-    while(sumofuser > 0)
+    while(0 < sumofuser)
     {
-        struct User_List *new = NULL;
-        new = (struct User_List *)malloc(sizeof(struct User_List));
-        fread(new,sizeof(struct User_List),1,fp);
-        user->next = new;
-        new->front = user;
+        struct User_List *newuser = NULL;
+        newuser = (struct User_List *)malloc(sizeof(struct User_List));
+        fread(newuser,sizeof(struct User_List),1,fp);
+        struct Friend *friend = &newuser->user.friends;
+        unsigned int numoffriends = newuser->user.numoffriend;
+        while(0 < numoffriends)
+        {
+            struct Friend *newfriend = NULL;
+            newfriend = (struct Friend *)malloc(sizeof(struct Friend));
+            fread(newfriend,sizeof(struct Friend),1,fp);
+            struct MessageLog *msglog = &newfriend->messagelog;
+            unsigned long numofmsg = newfriend->sumofmsglog;
+            while(0 < numofmsg)
+            {
+                struct MessageLog *newmsglog = NULL;
+                newmsglog = (struct MessageLog *)malloc(sizeof(struct MessageLog));
+                fread(newmsglog,sizeof(struct MessageLog),1,fp);
+                msglog->next = newmsglog;
+                newmsglog->next = NULL;
+                newmsglog->front = msglog;
+                msglog = msglog->next;
+                numofmsg--;
+            }
+            friend->next = newfriend;
+            newfriend->next = NULL;
+            newfriend->front = friend;
+            friend = friend->next;
+            numoffriends--;
+        }
+        struct OffLineMessage *offlinemsg = &newuser->user.offlinemessage;
+        int numofofflinemsg = newuser->user.sumofofflinemsg;
+        while(0 < numofofflinemsg)
+        {
+            struct OffLineMessage *newofflinemsg = NULL;
+            newofflinemsg = (struct OffLineMessage *)malloc(sizeof(struct OffLineMessage));
+            fread(newofflinemsg,sizeof(struct OffLineMessage),1,fp);
+            offlinemsg->next = newofflinemsg;
+            newofflinemsg->next = NULL;
+            newofflinemsg->front = offlinemsg;
+            offlinemsg = offlinemsg->next;
+            numofofflinemsg--;
+        }
+        user->next = newuser;
+        newuser->next = NULL;
+        newuser->front = user;
         user = user->next;
         sumofuser--;
     }
@@ -580,10 +620,10 @@ int GetFriendList(struct User_List *user,char name[],char namelist[][USERNAME_SI
                     {
                         strcpy(namelist[num],temp->name);
                         num++;
-                        if (NULL != temp->next)
+//                        if (NULL != temp->next)
                             temp = temp->next;
-                        else
-                            break;
+//                        else
+//                            break;
                     }
                     return user->user.numoffriend;
                 }
