@@ -19,22 +19,55 @@ int WindowInit()
     ColorInit();
 }
 
-int MessageBox(int x,int y,char *message,int sign)
+int MessageBox(int x,int y,char *message,int length,int sign)
 {
+    int result = 0;
+    while(result < 5)
+    {
+        move(y/2 + 2 - result,x/2 - 19);
+        printw("%-38s"," ");
+        result++;
+    }
+    result = 0;
     attron(COLOR_PAIR(6));
-    move(y/2 - 3,x/2 - 20);
-    hline(ACS_HLINE,40);
+    move(y/2 - 3,x/2 - 19);
+    hline(ACS_HLINE,38); 
     move(y/2 - 2,x/2 - 5);
     printw("提      醒");
+    move(y/2,x/2 - length);
+    printw("%-*s",length,message);
+    if (MSG_OK == sign)
+    {
+        move(y/2 + 2,x/2 - 10);
+        attron(COLOR_PAIR(3));
+        printw("  %-4s","OK");
+        attroff(COLOR_PAIR(3));
+        move(y/2 + 2,x/2 + 6);
+        attron(COLOR_PAIR(4));
+        printw("%6s","Cancel");
+        attroff(COLOR_PAIR(4));
+    }
+    else
+    {
+        move(y/2 + 2,x/2 - 10);
+        attron(COLOR_PAIR(4));
+        printw("  %-4s","OK");
+        attroff(COLOR_PAIR(4));
+        move(y/2 + 2,x/2 + 6);
+        attron(COLOR_PAIR(3));
+        printw("%6s","Cancel");
+        attroff(COLOR_PAIR(3));
+    }
     move(y/2 - 2,x/2 - 20);
+    attron(COLOR_PAIR(6));
     vline(ACS_VLINE,5);
-    move(y/2 + 3,x/2 - 20);
-    hline(ACS_HLINE,40);
+    move(y/2 + 3,x/2 - 19);
+    hline(ACS_HLINE,38);
     move(y/2 - 2,x/2 + 19);
     vline(ACS_VLINE,5);
     refresh();
     attroff(COLOR_PAIR(6));
-
+    return 0;
 }
 
 /****************************
@@ -57,9 +90,6 @@ int Cli_Login(int x,int y,char name[USERNAME_SIZE],char passwd[USERPASSWD_SIZE])
     scanw("%s",name);
     move(y/2,x/2-4);
     scanw("%s",passwd);
-    move(10,20);
-    printw("%s - %s",name,passwd);
-    refresh();
     return 0;
 }
 
@@ -129,34 +159,34 @@ int Cli_Welcome()
         if (sign == 1)
             attron(COLOR_PAIR(3));
         else
-            attron(COLOR_PAIR(4));
+            attron(COLOR_PAIR(7));
         move(y/2-2,x/2-4);
         printw("登    陆");
         if (sign == 1)
             attroff(COLOR_PAIR(3));
         else
-            attroff(COLOR_PAIR(4));
+            attroff(COLOR_PAIR(7));
         if (sign == 2)
             attron(COLOR_PAIR(3));
         else
-            attron(COLOR_PAIR(4));
+            attron(COLOR_PAIR(7));
         move(y/2,x/2-4);
         printw("新建账号");
         if (sign == 2)
             attroff(COLOR_PAIR(3));
         else
-            attroff(COLOR_PAIR(4));
+            attroff(COLOR_PAIR(7));
         if (sign == 3)
             attron(COLOR_PAIR(3));
         else
-            attron(COLOR_PAIR(4));
+            attron(COLOR_PAIR(7));
 
         move(y/2+2,x/2-4);
         printw("退    出");
         if (sign == 3)
             attroff(COLOR_PAIR(3));
         else
-            attroff(COLOR_PAIR(4));
+            attroff(COLOR_PAIR(7));
         refresh();
         key = 0;
         key = getch();
@@ -223,10 +253,10 @@ int ColorInit()
     init_pair(1,COLOR_GREEN,COLOR_BLACK);
     init_pair(2,COLOR_BLACK,COLOR_GREEN);
     init_pair(3,COLOR_RED,COLOR_GREEN);
-    init_pair(4,COLOR_GREEN,COLOR_BLACK);
+    init_pair(4,COLOR_RED,COLOR_WHITE);
     init_pair(5,COLOR_GREEN,COLOR_BLACK);
     init_pair(6,COLOR_RED,COLOR_BLACK);
-    init_pair(7,COLOR_GREEN,COLOR_BLACK);
+    init_pair(7,COLOR_RED,COLOR_WHITE);
 }
 /********************************
  *
@@ -392,10 +422,10 @@ int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int nu
             {
                 if (friendslist->online == 1)   //在线用户
                 {
-                    attron(COLOR_PAIR(4));
+                    attron(COLOR_PAIR(6));
                     move(cur,1);
                     printw("%-*s",15,friendslist->name);
-                    attroff(COLOR_PAIR(4));
+                    attroff(COLOR_PAIR(6));
                 }
                 else      //离线用户
                 {
@@ -435,10 +465,10 @@ int Cli_DisplayFriendList(int x,int y,struct Cli_Friendslist *friendslist,int nu
             {
                 if (friendslist->online == 1)   //在线用户
                 {
-                    attron(COLOR_PAIR(4));
+                    attron(COLOR_PAIR(6));
                     move(cur,1);
                     printw("%-*s",15,friendslist->name);
-                    attroff(COLOR_PAIR(4));
+                    attroff(COLOR_PAIR(6));
                 }
                 else      //离线用户
                 {
@@ -530,10 +560,10 @@ int Ser_DisplayUserList(int x,int y,char list[][USERNAME_SIZE],int num,int sum,i
             {
                 if (sign[temp] == 1)   //在线用户
                 {
-                    attron(COLOR_PAIR(4));
+                    attron(COLOR_PAIR(6));
                     move(cur,1);
                     printw("%-*s",15,list[temp]);
-                    attroff(COLOR_PAIR(4));
+                    attroff(COLOR_PAIR(6));
                 }
                 else      //离线用户
                 {
@@ -634,10 +664,11 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
  *       logout - 退出登录标识,为真有效
  * 
  * *********************************/
-int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign,int *addfriend_sign,char *addfriendsname)
+int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign,int *addfriend_sign,char *addfriendsname,int *messageboxsign,int *messageboxnum)
 {
     int key = 0;
     int x,y;
+    int sign_temp = 0;
     char temp[DATELEN];
     while(1)
     {
@@ -650,14 +681,47 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             key = getch();
             keypad(stdscr,0);
             leaveok(stdscr,0);
+            move(1,10);
+            printw("%d",key);
+            refresh();
             switch(key)
             {
+                case 10:
+                    if (0 == *sign)
+                        *sign = 1;
+                    break;
+                case 'h':             //向左移动
+                case KEY_LEFT:
+                    if (1 == *messageboxsign)
+                        *messageboxnum = 0;
+                    else
+                    {
+                        if (*sign > 0)
+                            (*sign)--;
+                        if (1 != *sign)
+                            num[1] = 0;
+                    }
+                    break;
+                case 'l':             //向右移动
+                case KEY_RIGHT:
+                    if (1 == *messageboxsign)
+                        *messageboxnum = 1;
+                    else
+                    {
+                        if (*sign < 3)
+                            (*sign)++;
+                        if (1 != *sign)
+                            num[1] = 0;
+                    }
+                    break;
+                case 'k':              //向上移动
                 case KEY_UP:
                     if (0 < num[*sign])
                         num[*sign]--;
                     if (1 != *sign)
                         num[1] = 0;
                     break;
+                case 'j':              //向下移动
                 case KEY_DOWN:
                     if (num[*sign] < max_num[*sign])
                         num[*sign]++;
@@ -666,19 +730,20 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                     if (1 != *sign)
                         num[1] = 0;
                     break;
-                case '1':
+                case '1':             //数字键  - 1
                     *sign = 3;
                     break;
-                case '2':
+                case '2':             //数字键  - 2
                     *sign = 0;
                     break;
-                case '3':
+                case '3':             //数字键  - 3
                     *sign = 1;
                     break;
-                case '4':
-                    *sign = 2;
+                case '4':             //数字键  - 4
+                    *messageboxsign = 1;
+//                    *sign = 2;
                     break;
-                case '5':
+                case '5':             //数字键  - 5
                     *logout = 1;
             //     return 0;
             }
@@ -700,9 +765,9 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             noecho();
             //输入'q'(quit)或'fl'(friend list)
             //则退出聊天模式，进入好友列表选择模式.
-            if (0 == strcmp(temp,"q"))
+            if (0 == strcmp(temp,CM_QUIT))               //退出
                 *sign = 0;
-            else if (0 == strcmp(temp,"fl"))
+            else if (0 == strcmp(temp,CM_MENU_FRIENDLIST))   //返回好友列表
                 *sign = 0;
             else if (0 == strncmp(temp,CM_ADDFRIEND,4))   //添加好友
             {

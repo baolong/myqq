@@ -31,6 +31,8 @@ int main()
     int fd_ = 0,fd[USER_MAX] = {0};
     int sumofcli = 0;
     int message_sign = 0;
+    int messageboxsign = 0;
+    int messageboxnum = 0;
 
     char name_cur[USERNAME_SIZE];
     char message[USER_MAX][DATELEN];
@@ -45,6 +47,8 @@ int main()
     argv_key->logout = &logout;
     argv_key->message = message_send;
     argv_key->message_sign = &message_sign;
+    argv_key->messageboxsign = &messageboxsign;
+    argv_key->messageboxnum = &messageboxnum;
 
     argv_dis->user = user;
     argv_dis->num = num;
@@ -52,6 +56,8 @@ int main()
     argv_dis->num_max = num_max;
     argv_dis->name_cur = name_cur;
     argv_dis->logout = &logout;
+    argv_dis->messageboxsign = &messageboxsign;
+    argv_dis->messageboxnum = &messageboxnum;
 
     char a[50][USERNAME_SIZE];
     WindowInit();
@@ -252,6 +258,7 @@ void *Display(void *argv1)
     struct User_List *user;
     argv2 = (struct arg_ser_dis *)argv1;
     int x = 0,y = 0;
+    int x1 = 0,y1 = 0;
     char userlist[200][USERNAME_SIZE];
     char friendlist[200][USERNAME_SIZE];
     int online_sign[200] = {0};
@@ -260,7 +267,6 @@ void *Display(void *argv1)
     int dis_temp = 0;
     x = 0;
     clear();
-    int x1,y1;
     leaveok(stdscr,1);
     noecho();
     while(1)
@@ -277,6 +283,8 @@ void *Display(void *argv1)
 //            if (dis_temp == 0)
 //                clear();   //清屏
             Ser_windows(&x,&y);   //初始化窗口界
+            x1 = x;
+            y1 = y;
             memset(userlist,0x0,sizeof(userlist));
             memset(friendlist,0x0,sizeof(friendlist));
             argv2->num_max[0] = GetUserList(argv2->user,userlist);    //获取用户列表
@@ -285,7 +293,8 @@ void *Display(void *argv1)
             argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
             Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
-            MessageBox(x,y,"asd",1);
+            if (*argv2->messageboxsign == 1)
+                MessageBox(x,y,"asd",4,*argv2->messageboxnum);
             usleep(100000);
         }
     }
@@ -298,7 +307,7 @@ void *Keyboard(void *argv1)
     int a = 0;
     char s[2];
     argv = (struct arg_ser_key *)argv1;
-    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,&a,s);
+    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,&a,s,argv->messageboxsign,argv->messageboxnum);
     pthread_exit(NULL);
 }
 

@@ -34,12 +34,15 @@
 #define MSGOWN_FRIENDS_I            2
 
 //客户端相关命令
+#define CM_QUIT                      "q"
+#define CM_MENU_FRIENDLIST           "fl"
 #define CM_ADDFRIEND                 "add "
 #define CM_DELFRIEND                 "del "
 
 #define CLOSE                       1
 #define RUNNING                     0
-
+#define MSG_OK                      0
+#define MSG_CANCEL                  1
 
 struct arg_dis    //显示线程参数结构体
 {
@@ -50,6 +53,8 @@ struct arg_dis    //显示线程参数结构体
     struct Cli_Friendslist *friendslist;    //好友列表
     int *sumoffriends;   //好友个数
     char *addfriendsname;
+    int *messageboxsign;   //提示窗口激活标识
+    int *messageboxnum;    //提示窗口选中标识
 };
 
 struct arg_recv   //网络接收线程参数结构体
@@ -58,8 +63,9 @@ struct arg_recv   //网络接收线程参数结构体
     char *sender;   //消息发送者
     char *message;  //接收消息缓冲区
     struct Cli_Friendslist *friendslist;  //好友列表
-    int *sumoffriends;
-    int *message_sign;
+    int *sumoffriends;   //好友总数
+    int *message_sign;  //消息缓冲区空标识
+    int *messageboxsign;    //消息窗口激活标识
 };
 
 struct arg_key    //按键检测线程参数结构体
@@ -70,8 +76,10 @@ struct arg_key    //按键检测线程参数结构体
     int *logout;    //退出标识
     char *message;    //接收缓冲区
     int *message_sign;   //缓冲区空标识，0表示为空
-    int *addfriend_sign;
-    char *addfriendsname;
+    int *addfriend_sign;   //添加/删除好友状态激活标识
+    char *addfriendsname;   //添加/删除好友好友名缓冲区
+    int *messageboxsign;   //提示窗口激活标识
+    int *messageboxnum;    //提示窗口选中标识
 };
 
 struct arg_ser_newconnect   //处理新链接线程参数结构体
@@ -93,16 +101,20 @@ struct arg_ser_key       //服务器按键检测线程参数结构体
     int *logout;      //退出标识
     char *message;     //消息缓冲区
     int *message_sign;     //缓冲区空标识，0表示为空
+    int *messageboxsign;   //提示窗口激活标识
+    int *messageboxnum;    //提示窗口选中标识
 };
 
 struct arg_ser_dis    //显示进程参数结构
 {
     struct User_List *user;    //用户链表
     int *num;                 //被选中用户序号
-    int *sign;
+    int *sign;               //功能选择标识
     int *num_max;           //各列表对象最大数
     char *name_cur;           //返回被选中用户名
-    int *logout;
+    int *logout;              //退出标识
+    int *messageboxsign;      //提示窗口激活标识
+    int *messageboxnum;       //提示窗口选中标识
 };
 
 

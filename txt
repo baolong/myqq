@@ -1,44 +1,70 @@
-==19073== Memcheck, a memory error detector
-==19073== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
-==19073== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
-==19073== Command: ./a
-==19073== Parent PID: 1513
-==19073== 
-==19073== Invalid read of size 1
-==19073==    at 0x3E78E4A26E: vfprintf (in /lib64/libc-2.14.1.so)
-==19073==    by 0x3E78EF641F: __vsnprintf_chk (in /lib64/libc-2.14.1.so)
-==19073==    by 0x3E7DE1B11C: _nc_printf_string (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x3E7DE1636E: vwprintw (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x3E7DE16618: printw (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x401BF2: main (server.c:86)
-==19073==  Address 0x4 is not stack'd, malloc'd or (recently) free'd
-==19073== 
-==19073== 
-==19073== Process terminating with default action of signal 11 (SIGSEGV)
-==19073==  Access not within mapped region at address 0x4
-==19073==    at 0x3E78E4A26E: vfprintf (in /lib64/libc-2.14.1.so)
-==19073==    by 0x3E78EF641F: __vsnprintf_chk (in /lib64/libc-2.14.1.so)
-==19073==    by 0x3E7DE1B11C: _nc_printf_string (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x3E7DE1636E: vwprintw (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x3E7DE16618: printw (in /lib64/libncursesw.so.5.8)
-==19073==    by 0x401BF2: main (server.c:86)
-==19073==  If you believe this happened as a result of a stack
-==19073==  overflow in your program's main thread (unlikely but
-==19073==  possible), you can try to increase the size of the
-==19073==  main thread stack using the --main-stacksize= flag.
-==19073==  The main thread stack size used in this run was 8388608.
-==19073== 
-==19073== HEAP SUMMARY:
-==19073==     in use at exit: 375,129 bytes in 195 blocks
-==19073==   total heap usage: 230 allocs, 35 frees, 383,386 bytes allocated
-==19073== 
-==19073== LEAK SUMMARY:
-==19073==    definitely lost: 4,080 bytes in 13 blocks
-==19073==    indirectly lost: 0 bytes in 0 blocks
-==19073==      possibly lost: 0 bytes in 0 blocks
-==19073==    still reachable: 371,049 bytes in 182 blocks
-==19073==         suppressed: 0 bytes in 0 blocks
-==19073== Rerun with --leak-check=full to see details of leaked memory
-==19073== 
-==19073== For counts of detected and suppressed errors, rerun with: -v
-==19073== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 6 from 6)
+==28661== Memcheck, a memory error detector
+==28661== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
+==28661== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
+==28661== Command: ./a
+==28661== Parent PID: 1527
+==28661== 
+==28661== Thread 2:
+==28661== Conditional jump or move depends on uninitialised value(s)
+==28661==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==28661==    by 0x406900: GetFriendList (user.c:613)
+==28661==    by 0x402854: Display (server.c:293)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661== 
+==28661== Conditional jump or move depends on uninitialised value(s)
+==28661==    at 0x406903: GetFriendList (user.c:613)
+==28661==    by 0x402854: Display (server.c:293)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661== 
+==28661== Conditional jump or move depends on uninitialised value(s)
+==28661==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==28661==    by 0x405301: Ser_DisPlayMsg (windows.c:821)
+==28661==    by 0x4028B9: Display (server.c:295)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661== 
+==28661== Conditional jump or move depends on uninitialised value(s)
+==28661==    at 0x4A079BC: strcmp (mc_replace_strmem.c:538)
+==28661==    by 0x405359: Ser_DisPlayMsg (windows.c:830)
+==28661==    by 0x4028B9: Display (server.c:295)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661== 
+==28661== Thread 3:
+==28661== Invalid read of size 4
+==28661==    at 0x404EC7: KeyboardControl (windows.c:714)
+==28661==    by 0x402975: Keyboard (server.c:310)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661==  Address 0x82e0e4e60 is not stack'd, malloc'd or (recently) free'd
+==28661== 
+==28661== 
+==28661== Process terminating with default action of signal 11 (SIGSEGV)
+==28661==  Access not within mapped region at address 0x82E0E4E60
+==28661==    at 0x404EC7: KeyboardControl (windows.c:714)
+==28661==    by 0x402975: Keyboard (server.c:310)
+==28661==    by 0x3E79207B40: start_thread (in /lib64/libpthread-2.14.1.so)
+==28661==    by 0x3E78EE0E6C: clone (in /lib64/libc-2.14.1.so)
+==28661==  If you believe this happened as a result of a stack
+==28661==  overflow in your program's main thread (unlikely but
+==28661==  possible), you can try to increase the size of the
+==28661==  main thread stack using the --main-stacksize= flag.
+==28661==  The main thread stack size used in this run was 8388608.
+==28661== 
+==28661== HEAP SUMMARY:
+==28661==     in use at exit: 378,829 bytes in 240 blocks
+==28661==   total heap usage: 316 allocs, 76 frees, 389,381 bytes allocated
+==28661== 
+==28661== LEAK SUMMARY:
+==28661==    definitely lost: 720 bytes in 1 blocks
+==28661==    indirectly lost: 0 bytes in 0 blocks
+==28661==      possibly lost: 544 bytes in 2 blocks
+==28661==    still reachable: 377,565 bytes in 237 blocks
+==28661==         suppressed: 0 bytes in 0 blocks
+==28661== Rerun with --leak-check=full to see details of leaked memory
+==28661== 
+==28661== For counts of detected and suppressed errors, rerun with: -v
+==28661== Use --track-origins=yes to see where uninitialised values come from
+==28661== ERROR SUMMARY: 91 errors from 5 contexts (suppressed: 6 from 6)
