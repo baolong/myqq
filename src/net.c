@@ -183,7 +183,8 @@ int SendMessage(struct User_List *user,char message[DATELEN],char receiver[USERN
     int fd;
     if ((fd = GetSocket(user,receiver)) < 0)
         return -1;
-    send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
+//    send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
+    Send(fd,DATETYPE_COMMUNICATE);
     usleep(SENDDELAYTIME);
     if ((num = send(fd,message,strlen(message),0)) > 0)
     {
@@ -217,7 +218,8 @@ int SendOffLineMessage(struct User_List *user)
             num++;
 //            offline = user->user.offlinemessage.next;
             del = offline;
-            send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
+            Send(fd,DATETYPE_COMMUNICATE);
+//            send(fd,DATETYPE_COMMUNICATE,2,0);   //发送数据类型——发送消息
             usleep(SENDDELAYTIME);
             Send(fd,offline->message);
             usleep(SENDDELAYTIME);
@@ -268,6 +270,7 @@ int SendFriendlist(struct User_List *user,struct User_List *cur,char *name,int f
         usleep(SENDDELAYTIME);
         numoffriend++;
     }
+    return 0;
 }
 
 

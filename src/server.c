@@ -33,6 +33,7 @@ int main()
     int message_sign = 0;
     int messageboxsign = 0;
     int messageboxnum = 0;
+    int change = 0;
 
     char name_cur[USERNAME_SIZE];
     char message[USER_MAX][DATELEN];
@@ -49,6 +50,7 @@ int main()
     argv_key->message_sign = &message_sign;
     argv_key->messageboxsign = &messageboxsign;
     argv_key->messageboxnum = &messageboxnum;
+    argv_key->change = &change;
 
     argv_dis->user = user;
     argv_dis->num = num;
@@ -58,6 +60,7 @@ int main()
     argv_dis->logout = &logout;
     argv_dis->messageboxsign = &messageboxsign;
     argv_dis->messageboxnum = &messageboxnum;
+    argv_dis->change = &change;
 
     char a[50][USERNAME_SIZE];
     WindowInit();
@@ -208,33 +211,40 @@ loop:
             if (MENU_ADDFRIEND_I == num)   //添加好友
             {
                 recv(*argv->fd,receiver,USERNAME_SIZE*sizeof(char),0);
+                pthread_mutex_lock(&mut);
                 AddFriend(argv->user,argv->name,receiver);   //本用户添加对方好友
                 AddFriend(argv->user,receiver,argv->name);   //对方用户添加自己为好友
+                pthread_mutex_unlock(&mut);
                 SendFriendlist(argv->user,cur,argv->name,*argv->fd);  //发送好友列表
             }
             else if (MENU_DELFRIEND_I == num)    //删除好友
             {
                 recv(*argv->fd,receiver,USERNAME_SIZE*sizeof(char),0);
+                pthread_mutex_lock(&mut);
                 DelFriend(argv->user,argv->name,receiver);
                 DelFriend(argv->user,receiver,argv->name);
+                pthread_mutex_unlock(&mut);
                 SendFriendlist(argv->user,cur,argv->name,*argv->fd);
             }
             else if (MENU_SENDMESSAGE_I == num)  //发送信息
             {
                 if (1 == OnLine(argv->user,receiver,1))    //判断接收人是否在线
                 {
+                    pthread_mutex_lock(&mut);
                     SendMessage(argv->user,message,receiver,argv->name);   //在线则直接发送给用户
                     InsertToMessagelog(&cur->user.friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
+                pthread_mutex_unlock(&mut);
                 }
                 else
                 {
+                    pthread_mutex_lock(&mut);
                     InsertOffLineMessage(argv->user,message,receiver,argv->name);     //不在线则存入用户离线消息列表
                     InsertToMessagelog(&cur->user.friends,receiver,message,MSGOWN_FRIENDS_I);   //将信息写入接收者聊天记录
+                    pthread_mutex_unlock(&mut);
                 }
             }
             else  //出错,则自动断开链接
             {
-//                pthread_mutex_unlock(&mut);
                 break;
             }
 //            pthread_mutex_unlock(&mut);
@@ -254,9 +264,10 @@ loop:
 
 void *Display(void *argv1)
 {
-    struct arg_ser_dis *argv2;
-    struct User_List *user;
+    struct arg_ser_dis *argv2= NULL;
+    struct User_List *user = NULL,*cur = NULL;
     argv2 = (struct arg_ser_dis *)argv1;
+    cur = argv2->user;
     int x = 0,y = 0;
     int x1 = 0,y1 = 0;
     char userlist[200][USERNAME_SIZE];
@@ -265,26 +276,35 @@ void *Display(void *argv1)
     char friend_cur[USERNAME_SIZE];
     int sumoffriends = 0;
     int dis_temp = 0;
-    x = 0;
+    int sumofonlineuser = 0;
+    int sumofonlineuser_temp = 0;
+    int sumofuser = 0;
+    int sumofuser_temp = 0;
+    
     clear();
     leaveok(stdscr,1);
     noecho();
+    int a=0;
     while(1)
     {
-        if (1 == *argv2->logout)     //关闭并保存数据
+        if (CLOSE == *argv2->logout)     //关闭并保存数据
         {
             Ser_SaveList(argv2->user);
             endwin();
             exit(0);
         }
-//        clear();
-//        refresh();
+        x1 = x;
+        y1 = y;
+        sumofuser_temp = sumofuser;
+        sumofonlineuser_temp = sumofonlineuser;
+        GetSize(&y,&x);
+        if (x != x1 || y != y1)
+            clear();   //清屏
+        sumofuser = ListLength(argv2->user,&sumofonlineuser);
+        if (1 == *argv2->change || sumofuser != sumofuser_temp || sumofonlineuser != sumofonlineuser_temp)
         {
-//            if (dis_temp == 0)
-//                clear();   //清屏
-            Ser_windows(&x,&y);   //初始化窗口界
-            x1 = x;
-            y1 = y;
+            *argv2->change = 0;
+            Ser_windows(&x,&y,sumofonlineuser,sumofuser);   //初始化窗口界
             memset(userlist,0x0,sizeof(userlist));
             memset(friendlist,0x0,sizeof(friendlist));
             argv2->num_max[0] = GetUserList(argv2->user,userlist);    //获取用户列表
@@ -293,10 +313,8 @@ void *Display(void *argv1)
             argv2->num_max[1] = GetFriendList(argv2->user,argv2->name_cur,friendlist);    //获取对应用户好友列表
             Ser_DisplayFriendList(x,y,friendlist,argv2->num[1],argv2->num_max[1],friend_cur);   //显示好友列表 
             Ser_DisPlayMsg(x,y,argv2->user,argv2->name_cur,friend_cur);
-            if (*argv2->messageboxsign == 1)
-                MessageBox(x,y,"asd",4,*argv2->messageboxnum);
-            usleep(100000);
         }
+        usleep(10000);
     }
     pthread_exit(NULL);
 }
@@ -307,7 +325,7 @@ void *Keyboard(void *argv1)
     int a = 0;
     char s[2];
     argv = (struct arg_ser_key *)argv1;
-    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,&a,s,argv->messageboxsign,argv->messageboxnum);
+    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,&a,s,argv->messageboxsign,argv->messageboxnum,argv->change);
     pthread_exit(NULL);
 }
 

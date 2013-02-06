@@ -46,15 +46,18 @@ int ListEmpty(struct User_List *user)
  * 返回值：账号个数
  *
  * *********************************/
-int ListLength(struct User_List *user)
+int ListLength(struct User_List *user,int *sumofonlineuser)
 {
-    int num = 0;
+    int sumofuser = 0;
+    *sumofonlineuser = 0;
     while(user->next != NULL)
     {
-        num++;
+        sumofuser++;
+        if (ONLINE == user->user.online)
+            (*sumofonlineuser)++;
         user = user->next;
     }
-    return(num);
+    return(sumofuser);
 }
 
 /************************************************
@@ -345,8 +348,9 @@ int Ser_SaveList(struct User_List *user)
     if (NULL == (fp = fopen("date","w+")))             //打开date文件
         return 3;
     int sumofuser = 0;      //用户个数 整形
+    int sumofonlineuser = 0;
     char sum_[3];     //用户个数 字符串
-    sumofuser = ListLength(user);    //获取用户总数
+    sumofuser = ListLength(user,&sumofonlineuser);    //获取用户总数
     sprintf(sum_,"%d",sumofuser);
     fwrite(sum_,sizeof(sum_),1,fp);
     if (0 < sumofuser)
@@ -373,6 +377,10 @@ int Ser_SaveList(struct User_List *user)
                 fwrite(offlinemsg,sizeof(struct OffLineMessage),1,fp);
                 offlinemsg = offlinemsg->next;
             }
+/*            move(1,10);
+            printw("写入:%s",user->user.name);
+            refresh();
+            sleep(1);*/
             user = user->next;
         }
     }

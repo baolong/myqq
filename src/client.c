@@ -68,6 +68,7 @@ int main()
     argv_dis->addfriendsname = addfriendsname;
     argv_dis->messageboxsign = &messageboxsign;
     argv_dis->messageboxnum = &messageboxnum;
+    argv_dis->logout = &logout;
 
     argv_recv->fd = &fd;
     argv_recv->sender = sender;
@@ -210,7 +211,8 @@ void *Keyboard(void *argv1)
     struct arg_key *argv;
     argv = (struct arg_key *)argv1;  //初始化线程参数结构体
     int a = 0;
-    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,argv->addfriend_sign,argv->addfriendsname,argv->messageboxsign,argv->messageboxnum);
+    int b = 0;
+    KeyboardControl(argv->num,argv->num_max,argv->sign,argv->logout,argv->message,argv->message_sign,argv->addfriend_sign,argv->addfriendsname,argv->messageboxsign,argv->messageboxnum,&b);
 }
 
 /*************************
@@ -227,6 +229,11 @@ void *Display(void *argv1)
     noecho();
     while(1)
     {
+        if (CLOSE == *argv->logout)
+        {
+            endwin();
+            exit(0);
+        }
 //        clear();
             leaveok(stdscr,1);
             Cli_Windows(&x,&y);   //客户端界面框架

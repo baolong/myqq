@@ -128,9 +128,6 @@ loop:    clear();
         getch();
         goto loop;
     }
-    move(10,20);
-    printw("%s - %s",name,passwd);
-    refresh();
     return 0;
 }
 
@@ -155,6 +152,8 @@ int Cli_Welcome()
         attron(COLOR_PAIR(1));
         GetSize(&x,&y);
         box(stdscr,0,0);
+        move(y/2 -10,x/2 - 5);
+        printw("Mychat v1.0");
         attroff(COLOR_PAIR(2));
         if (sign == 1)
             attron(COLOR_PAIR(3));
@@ -187,6 +186,8 @@ int Cli_Welcome()
             attroff(COLOR_PAIR(3));
         else
             attroff(COLOR_PAIR(7));
+        move(y - 2,x/2 - 17);
+        printw("By long, At 2013.2.6, QQ:947660101");
         refresh();
         key = 0;
         key = getch();
@@ -278,7 +279,7 @@ int Cli_Windows(int *x,int *y)
     GetTime(time);
     box(stdscr,0,0);        //外边框
     move(1,*x/2-10);
-    printw("多人聊天软件");
+    printw("多人聊天软件客户端 v1.0");
     move(2,*x-25);
     printw("时间:%-19s",time);
     move(3,1);
@@ -309,7 +310,7 @@ int Cli_Windows(int *x,int *y)
  * 函数功能：服务器界面窗口a
  *
  * ****************************/
-int Ser_windows(int *x,int *y)
+int Ser_windows(int *x,int *y,int sumofonlineuser,int sumofuser)
 {
     int x1,y1;
     char time[21];
@@ -321,7 +322,7 @@ int Ser_windows(int *x,int *y)
     leaveok(stdscr,1);
     box(stdscr,0,0);
     move(1,*x/2-14);
-    printw("多人聊天软件服务器端");
+    printw("多人聊天软件服务器端 v1.0");
     move(2,*x-25);
     printw("时间:%-19s",time);
     move(3,1);
@@ -339,9 +340,9 @@ int Ser_windows(int *x,int *y)
     move(4,*x-15);
     printw("服务器信息");
     move(6,*x-19);
-    printw("用户总数：123");
+    printw("  用户总数：%-4d",sumofuser);
     move(7,*x-19);
-    printw("在线用户数：123");
+    printw("在线用户数：%-4d",sumofonlineuser);
     move(11,*x-19);
     hline(ACS_HLINE,18);
     move(12,*x - 14);
@@ -664,7 +665,7 @@ int Ser_DisplayFriendList(int x,int y,char friends[][USERNAME_SIZE],int num,int 
  *       logout - 退出登录标识,为真有效
  * 
  * *********************************/
-int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign,int *addfriend_sign,char *addfriendsname,int *messageboxsign,int *messageboxnum)
+int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,int *message_sign,int *addfriend_sign,char *addfriendsname,int *messageboxsign,int *messageboxnum,int *change)
 {
     int key = 0;
     int x,y;
@@ -681,14 +682,12 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             key = getch();
             keypad(stdscr,0);
             leaveok(stdscr,0);
-            move(1,10);
-            printw("%d",key);
-            refresh();
+            *change = 1;
             switch(key)
             {
                 case 10:
-                    if (0 == *sign)
-                        *sign = 1;
+//                    if (0 == *sign)
+                        *sign = 3;
                     break;
                 case 'h':             //向左移动
                 case KEY_LEFT:
@@ -747,7 +746,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
                     *logout = 1;
             //     return 0;
             }
-            usleep(1000);
+//            usleep(1000);
         }
         else     //若功能选择为聊天呼入模式，则获取用户输入
         {
@@ -766,7 +765,7 @@ int KeyboardControl(int *num,int *max_num,int *sign,int *logout,char *message,in
             //输入'q'(quit)或'fl'(friend list)
             //则退出聊天模式，进入好友列表选择模式.
             if (0 == strcmp(temp,CM_QUIT))               //退出
-                *sign = 0;
+                *logout = CLOSE;
             else if (0 == strcmp(temp,CM_MENU_FRIENDLIST))   //返回好友列表
                 *sign = 0;
             else if (0 == strncmp(temp,CM_ADDFRIEND,4))   //添加好友

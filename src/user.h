@@ -7,6 +7,8 @@
 #define USER_MAX 100  //最大在线人数
 #define FRIENDS_MAX 100 //最大好友数
 #define SENDDELAYTIME 100  //发送延时 单位毫秒
+#define ONLINE   1
+#define OFFLINE  0
 
 struct MessageLog
 {
@@ -66,7 +68,7 @@ extern struct User_List list;
 
 int InitList(struct User_List *user);
 int ListEmpty(struct User_List *user);
-int ListLength(struct User_List *user);
+int ListLength(struct User_List *user,int *sumofonlineuser);
 int UserChecking(struct User_List *user,char name[],char password[]);
 int UserLogin(struct User_List *user,int fp);
 int AddUser(struct User_List *user,char name[],char password[],unsigned int num,char friends[][USERNAME_SIZE]);

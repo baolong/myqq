@@ -16,7 +16,8 @@
 
 #define MENU_ADDFRIEND             "8"    //添加新好友
 #define MENU_SENDMESSAGE           "9"    //发送消息
-#define MENU_DELFRIEND             "10"
+#define MENU_DELFRIEND             "10"   //删除好友
+#define ADDFRIEND_SUCCESS          "11"   //添加好友成功
 
 //消息归属宏
 #define MSGOWN_MYSELF               "1"   //消息归属为自身
@@ -29,15 +30,16 @@
 #define MENU_ADDFRIEND_I            8
 #define MENU_SENDMESSAGE_I          9
 #define MENU_DELFRIEND_I            10
+#define ADDFRIEND_SUCCESS_I         11
 
 #define MSGOWN_MYSELF_I             1
 #define MSGOWN_FRIENDS_I            2
 
 //客户端相关命令
-#define CM_QUIT                      "q"
-#define CM_MENU_FRIENDLIST           "fl"
-#define CM_ADDFRIEND                 "add "
-#define CM_DELFRIEND                 "del "
+#define CM_QUIT                      "quit"       //退出
+#define CM_MENU_FRIENDLIST           "fl"     //选中好友列表
+#define CM_ADDFRIEND                 "add "   //添加好友
+#define CM_DELFRIEND                 "del "   //删除好友
 
 #define CLOSE                       1
 #define RUNNING                     0
@@ -55,6 +57,7 @@ struct arg_dis    //显示线程参数结构体
     char *addfriendsname;
     int *messageboxsign;   //提示窗口激活标识
     int *messageboxnum;    //提示窗口选中标识
+    int *logout;      //退出标识
 };
 
 struct arg_recv   //网络接收线程参数结构体
@@ -103,6 +106,7 @@ struct arg_ser_key       //服务器按键检测线程参数结构体
     int *message_sign;     //缓冲区空标识，0表示为空
     int *messageboxsign;   //提示窗口激活标识
     int *messageboxnum;    //提示窗口选中标识
+    int *change;
 };
 
 struct arg_ser_dis    //显示进程参数结构
@@ -115,9 +119,8 @@ struct arg_ser_dis    //显示进程参数结构
     int *logout;              //退出标识
     int *messageboxsign;      //提示窗口激活标识
     int *messageboxnum;       //提示窗口选中标识
+    int *change; 
 };
-
-
 
 #endif
 
